@@ -8,9 +8,9 @@ chmod +x $JQ
 
 if [ $DB_TYPE = "postgres" ] ; then
   tar -xvzf $(find sqlclient-postgres -type f -name "psql*")
-  ./psql/bin/psql $DATABASE_URL -c "create table smoke (id integer, name text);"
-  ./psql/bin/psql $DATABASE_URL -c "insert into smoke values (1, 'smoke');"
-  ./psql/bin/psql $DATABASE_URL -c "drop table smoke;"
+  ./psql/bin/psql "${DATABASE_URL}?sslmode=verify-ca" -c "create table smoke (id integer, name text);"
+  ./psql/bin/psql "${DATABASE_URL}?sslmode=verify-ca" -c "insert into smoke values (1, 'smoke');"
+  ./psql/bin/psql "${DATABASE_URL}?sslmode=verify-ca" -c "drop table smoke;"
 elif [ $DB_TYPE = "mysql" ] ; then
   gunzip -c $(find sqlclient-mysql -type f -name "mysql*") > mysql
   chmod +x ./mysql
