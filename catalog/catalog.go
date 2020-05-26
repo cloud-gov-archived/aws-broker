@@ -88,7 +88,7 @@ type RDSPlan struct {
 	Encrypted             bool              `yaml:"encrypted" json:"-"`
 	StorageType           string            `yaml:"storage_type" json:"-"`
 	AllocatedStorage      int64             `yaml:"allocatedStorage" json:"-"`
-	BackupRetentionPeriod int64             `yaml:"backup_retention_period" json:"-"" validate:"required"`
+	BackupRetentionPeriod int64             `yaml:"backup_retention_period" json:"-" validate:"required"`
 	SubnetGroup           string            `yaml:"subnetGroup" json:"-" validate:"required"`
 	SecurityGroup         string            `yaml:"securityGroup" json:"-" validate:"required"`
 }

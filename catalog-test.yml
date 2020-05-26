@@ -75,6 +75,7 @@ rds:
               usd: 0
             unit: "MONTHLY"
         displayName: "Free Shared Plan"
+      backup_retention_period: 14
       free: true
       adapter: shared
       dbType: postgres
@@ -98,6 +99,7 @@ rds:
               usd: 0.036
             unit: "HOURLY"
         displayName: "Dedicated Micro Postgres"
+      backup_retention_period: 14
       free: false
       adapter: dedicated
       instanceClass: db.t2.micro
@@ -122,6 +124,7 @@ rds:
               usd: 0.19
             unit: "HOURLY"
         displayName: "Dedicated Medium Postgres"
+      backup_retention_period: 14
       free: false
       adapter: dedicated
       instanceClass: db.t3.medium
@@ -146,6 +149,7 @@ rds:
               usd: 0
             unit: "MONTHLY"
         displayName: "Free Shared Plan"
+      backup_retention_period: 14
       free: true
       adapter: shared
       dbType: mysql
@@ -169,6 +173,7 @@ rds:
               usd: 0.036
             unit: "HOURLY"
         displayName: "Dedicated Micro MySQL"
+      backup_retention_period: 14
       free: false
       adapter: dedicated
       instanceClass: db.t2.micro
@@ -193,6 +198,7 @@ rds:
               usd: 0.19
             unit: "HOURLY"
         displayName: "Dedicated Medium MySQL"
+      backup_retention_period: 14
       free: false
       adapter: dedicated
       instanceClass: db.t3.medium
@@ -218,6 +224,7 @@ rds:
               usd: 19.19
             unit: "HOURLY"
         displayName: "Dedicated Medium Oracle SE2"
+      backup_retention_period: 14
       free: false
       adapter: dedicated
       instanceClass: db.t3.medium
