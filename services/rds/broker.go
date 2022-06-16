@@ -19,7 +19,7 @@ import (
 // the broker for the "cf create-service" and "cf update-service" commands -
 // they are passed in via the "-c <JSON string or file>" flag.
 type Options struct {
-	AllocatedStorage      int64  `json:"storage"`
+	AllocatedStorage      int64  `json:"storage"` // Storage in GB.
 	EnableFunctions       bool   `json:"enable_functions"`
 	PubliclyAccessible    bool   `json:"publicly_accessible"`
 	Version               string `json:"version"`
@@ -190,6 +190,8 @@ func (broker *rdsBroker) CreateInstance(c *catalog.Catalog, id string, createReq
 	return response.SuccessAcceptedResponse
 }
 
+// ModifyInstance validates the requested modifications against a set of rules, and if they
+// are found to be valid, modifies the instance.
 func (broker *rdsBroker) ModifyInstance(c *catalog.Catalog, id string, modifyRequest request.Request, baseInstance base.Instance) response.Response {
 	existingInstance := RDSInstance{}
 
@@ -212,6 +214,53 @@ func (broker *rdsBroker) ModifyInstance(c *catalog.Catalog, id string, modifyReq
 		return response.NewErrorResponse(http.StatusNotFound, "The instance does not exist.")
 	}
 
+	// Fetch the instance's existing plan.
+	existingPlan, existingPlanErr := c.RdsService.FetchPlan(existingInstance.PlanID)
+	if existingPlanErr != nil {
+		return existingPlanErr
+	}
+
+	// Connect to the existing instance.
+	adapter, adapterErr := initializeAdapter(existingPlan, broker.settings, c)
+	if adapterErr != nil {
+		return adapterErr
+	}
+
+	// Check to see if the database is full. If so, increasing the size by at least 10% is the only allowed change.
+	state, err := adapter.checkDBStatus(&existingInstance)
+	if err != nil {
+		return response.NewErrorResponse(http.StatusInternalServerError, "An internal error occurred while modifying the instance.")
+	}
+	if state == base.InstanceStorageFull {
+		minNewStorage := existingInstance.AllocatedStorage/10 + existingInstance.AllocatedStorage
+		if options.AllocatedStorage < minNewStorage {
+			return response.NewErrorResponse(
+				http.StatusBadRequest,
+				fmt.Sprintf("Instance storage is full. You must increase storage by at least 10 percent (to %vGB total).", minNewStorage),
+			)
+		}
+
+		otherChanges := options.BackupRetentionPeriod != existingInstance.BackupRetentionPeriod ||
+			options.EnableFunctions != existingInstance.EnableFunctions ||
+			options.PubliclyAccessible != existingInstance.PubliclyAccessible ||
+			modifyRequest.PlanID != existingInstance.PlanID
+		if otherChanges {
+			return response.NewErrorResponse(
+				http.StatusBadRequest,
+				fmt.Sprintf("Instance storage is full. You must increase storage by at least 10 percent (to %vGB total) before making other changes in a separate request.", minNewStorage),
+			)
+		}
+
+		existingInstance.AllocatedStorage = options.AllocatedStorage
+		return broker.modifyInstance(c, existingPlan, existingInstance)
+	}
+
+	// Fetch the new plan that has been requested.
+	newPlan, newPlanErr := c.RdsService.FetchPlan(modifyRequest.PlanID)
+	if newPlanErr != nil {
+		return newPlanErr
+	}
+
 	// Check to see if there is a storage size change and if so, check to make sure it's a valid change.
 	if options.AllocatedStorage > 0 {
 		// Check that we are not decreasing the size of the instance.
@@ -229,12 +278,6 @@ func (broker *rdsBroker) ModifyInstance(c *catalog.Catalog, id string, modifyReq
 	// Check if there is a backup retention change:
 	if options.BackupRetentionPeriod > 0 {
 		existingInstance.BackupRetentionPeriod = options.BackupRetentionPeriod
-	}
-
-	// Fetch the new plan that has been requested.
-	newPlan, newPlanErr := c.RdsService.FetchPlan(modifyRequest.PlanID)
-	if newPlanErr != nil {
-		return newPlanErr
 	}
 
 	// Check to make sure that we're not switching database engines; this is not
@@ -272,14 +315,19 @@ func (broker *rdsBroker) ModifyInstance(c *catalog.Catalog, id string, modifyReq
 		)
 	}
 
+	return broker.modifyInstance(c, newPlan, existingInstance)
+}
+
+// modifyInstance makes changes to the instance in AWS. It performs no validation on the changes.
+func (broker *rdsBroker) modifyInstance(c *catalog.Catalog, plan catalog.RDSPlan, instance RDSInstance) response.Response {
 	// Connect to the existing instance.
-	adapter, adapterErr := initializeAdapter(newPlan, broker.settings, c)
+	adapter, adapterErr := initializeAdapter(plan, broker.settings, c)
 	if adapterErr != nil {
 		return adapterErr
 	}
 
 	// Modify the database instance.
-	status, err := adapter.modifyDB(&existingInstance, existingInstance.ClearPassword)
+	status, err := adapter.modifyDB(&instance, instance.ClearPassword)
 
 	if status == base.InstanceNotModified {
 		desc := "There was an error modifying the instance."
@@ -292,9 +340,9 @@ func (broker *rdsBroker) ModifyInstance(c *catalog.Catalog, id string, modifyReq
 	}
 
 	// Update the existing instance in the broker.
-	existingInstance.State = status
-	existingInstance.PlanID = newPlan.ID
-	err = broker.brokerDB.Save(&existingInstance).Error
+	instance.State = status
+	instance.PlanID = plan.ID
+	err = broker.brokerDB.Save(&instance).Error
 
 	if err != nil {
 		return response.NewErrorResponse(http.StatusBadRequest, err.Error())

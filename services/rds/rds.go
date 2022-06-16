@@ -367,6 +367,8 @@ func (d *dedicatedDBAdapter) checkDBStatus(i *RDSInstance) (base.InstanceState, 
 			for _, value := range resp.DBInstances {
 				// First check that the instance is up.
 				fmt.Println("Database Instance:" + i.Database + " is " + *(value.DBInstanceStatus))
+				// List of all possible statuses:
+				// https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/accessing-monitoring.html#Overview.DBInstance.Status
 				switch *(value.DBInstanceStatus) {
 				case "available":
 					return base.InstanceReady, nil
@@ -376,6 +378,8 @@ func (d *dedicatedDBAdapter) checkDBStatus(i *RDSInstance) (base.InstanceState, 
 					return base.InstanceNotGone, nil
 				case "failed":
 					return base.InstanceNotCreated, nil
+				case "storage-full":
+					return base.InstanceStorageFull, nil
 				default:
 					return base.InstanceInProgress, nil
 				}

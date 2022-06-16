@@ -26,6 +26,8 @@ const (
 	InstanceNotGone // 4
 	// InstanceNotModified indicates that the instance is not modified.
 	InstanceNotModified // 5
+	// InstanceStorageFull is an RDS-specific status which indicates that the DB instance has reached its storage capacity allocation.
+	InstanceStorageFull // 6
 )
 
 func (i InstanceState) String() string {
