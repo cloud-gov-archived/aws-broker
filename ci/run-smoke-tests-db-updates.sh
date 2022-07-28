@@ -2,7 +2,6 @@
 
 set -euxo pipefail
 
-
 # Function for waiting on a service instance to finish being processed.
 wait_for_service_instance() {
   local service_name=$1

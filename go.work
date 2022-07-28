@@ -1,0 +1,5 @@
+go 1.18
+use (
+    ./ci/smoke-tests/aws-rds/update-storage-full
+    .
+)
