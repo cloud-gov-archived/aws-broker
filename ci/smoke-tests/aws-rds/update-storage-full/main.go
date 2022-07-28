@@ -76,16 +76,21 @@ func fillDatabase(ctx context.Context, db *sql.DB) {
 		log.Fatal("dropping and recreating table", err)
 	}
 
+	s := randomString(1024 * 1024) // 1MB per row
+	stmt, err := db.PrepareContext(ctx, fmt.Sprintf(`INSERT INTO data(t) VALUES ('%v');`, s))
+	if err != nil {
+		log.Fatal("preparing insert statement:", err)
+	}
+	defer stmt.Close()
 	for err == nil {
-		s := randomString(1024 * 1024) // 1MB per row
-		_, err = db.ExecContext(ctx, `INSERT INTO data(t) VALUES ($1);`, s)
+		_, err = stmt.ExecContext(ctx)
 		records++
 	}
 
 	if strings.Contains(err.Error(), "No space left on device") {
 		databaseFull = true
-		log.Printf("Stopped filling database. Filled %v rows. Error was: %v\n", records, err.Error())
 	}
+	log.Printf("Stopped filling database. Filled %v rows. Error was: %v\n", records, err.Error())
 }
 
 func logUpdates(ctx context.Context, db *sql.DB) {
