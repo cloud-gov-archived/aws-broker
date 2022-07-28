@@ -11,10 +11,6 @@ import (
 	"time"
 
 	// init the postgres driver
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	_ "github.com/lib/pq"
 )
 
@@ -26,51 +22,45 @@ func randomString(length int32) string {
 	return string(s)
 }
 
-func awsStuff(c configuration) {
-	sess := session.Must(session.NewSession(&aws.Config{
-		Region: &c.s3Region,
-	}))
-	svc := s3.New(sess)
-	if _, err := svc.HeadBucket(&s3.HeadBucketInput{Bucket: &c.s3BucketName}); err != nil {
-
-	}
-}
-
 type configuration struct {
-	s3AccessKeyID     string
-	s3SecretAccessKey string
-	s3Region          string
-	s3BucketName      string
+	databaseURI string
 }
 
-// vcapServicesEnv represents the VCAP_SERVICES environment variable that is set by Cloud Foundry on applications with bound services. The variable changes based on the services bindings made to the app. The fields on vcapServicesEnv correspond to the particular services that must be be bound to this application for it to run.
+// vcapServicesEnv represents a subset of the VCAP_SERVICES environment variable that is set by Cloud Foundry on applications with bound services. The variable holds a JSON blob and its contents vary depending on the service bindings made to the app. The fields listed here correspond to the particular services that must be be bound to this application for it to run.
 //
 // See also: https://docs.cloudfoundry.org/devguide/deploy-apps/environment-variable.html#VCAP-SERVICES
 type vcapServicesEnv struct {
-	S3 []struct {
+	RDS []struct {
 		Credentials struct {
-			AccessKeyID     string `json:"access_key_id"`
-			SecretAccessKey string `json:"secret_access_key"`
-			Region          string `json:"region"`
-			Bucket          string `json:"bucket"`
+			URI string `json:"uri"`
 		} `json:"credentials"`
-	} `json:"s3"`
+	} `json:"aws-rds"`
 }
 
-// credentials reads bound service credentials from the environment.
-func credentials() (configuration, error) {
-	d := []byte(os.Getenv("VCAP_SERVICES"))
+// config reads configuration from the environment.
+func config(ctx context.Context, timeout time.Duration) (configuration, error) {
+	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(timeout))
+	defer cancel()
+
+	s := os.Getenv("VCAP_SERVICES")
+	// wait for service binding information to appear until deadline is exceeded.
+	for s == "" {
+		select {
+		case <-ctx.Done():
+			return configuration{}, fmt.Errorf("service binding information was not found before timeout")
+		default:
+		}
+		time.Sleep(time.Second)
+		s = os.Getenv("VCAP_SERVICES")
+	}
+
 	v := vcapServicesEnv{}
-	err := json.Unmarshal(d, &v)
+	err := json.Unmarshal([]byte(s), &v)
 	if err != nil {
 		return configuration{}, fmt.Errorf("failed to read required configuration from the environment: %w", err)
 	}
 	c := configuration{}
-	s := v.S3[0]
-	c.s3AccessKeyID = s.Credentials.AccessKeyID
-	c.s3SecretAccessKey = s.Credentials.SecretAccessKey
-	c.s3Region = s.Credentials.Region
-	c.s3BucketName = s.Bucket
+	c.databaseURI = v.RDS[0].Credentials.URI
 
 	return c, nil
 }
@@ -83,13 +73,15 @@ func credentials() (configuration, error) {
 // Standard postgresql connection variables must be set on the environment for
 // this script to run. See https://www.postgresql.org/docs/14/libpq-envars.html.
 func main() {
-	// check if the s3 bucket already has an object in it.
-
-	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(5*time.Second))
+	// 10 minute overall timeout.
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(2*time.Minute))
 	defer cancel()
-	// No connection string is required because lib/pq gets standard variables from
-	// the environment automatically.
-	db, err := sql.Open("postgres", "")
+
+	c, err := config(ctx, 30*time.Second)
+	if err != nil {
+		log.Fatal(err)
+	}
+	db, err := sql.Open("postgres", c.databaseURI)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -97,15 +89,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	var rows int64
 	for err == nil {
 		s := randomString(1024 * 1024) // 1MB per row
 		_, err = db.ExecContext(ctx, `INSERT INTO data(t) VALUES ($1);`, s)
+		rows++
 	}
 
 	// todo figure out the 'storage full' error and exit 0 if it's that, but otherwise exit 1
-	log.Println("Stopped filling database. Error was:", err.Error())
+	log.Printf("Stopped filling database. Filled %v rows. Error was: %v\n", rows, err.Error())
 
-	// here, exec pg_dump (or an aws-specific command?)
-	// (or just exit and do this outside?)
 	os.Exit(0)
 }

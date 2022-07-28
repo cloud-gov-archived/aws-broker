@@ -6,8 +6,7 @@ applications:
   env:
     GOVERSION: go1.18
   services:
-    - aws-broker-smoke-tests # s3 bucket
-    -
+    - aws-smoke-tests
 # brokerpak one: https://github.com/cloudfoundry/cloud-service-broker/blob/main/docs/tutorial.md
 
 # left off: stscreds needs IAM name, but it's not in VCAP_SERVICES.
