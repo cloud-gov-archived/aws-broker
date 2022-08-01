@@ -53,24 +53,29 @@ done
 # wait for the app to start. if the app starts, it's passed the smoke test.
 cf push "smoke-tests-storage-full-${SERVICE_PLAN}"
 
-# check if the bucket exists. if not, create it.
-if ! cf service aws-broker-smoke-tests &> /dev/null; then
-  cf create-service s3 basic aws-broker-smoke-tests
-fi
+# push the database filling app
+popd
+pushd smoke-tests/aws-rds/update-storage-full
+cf push "aws-broker-smoke-tests-fill-storage" -f manifest.yml --no-start
+cf bind-service "aws-broker-smoke-tests-fill-storage" "rds-smoke-tests-db-storage-full-$SERVICE_PLAN"
+cf push "aws-broker-smoke-tests-fill-storage"
 
-# check if
-# run the database population script, which will exit immediately if the database is already full.
-# if script fails, fail tests. If it passes, continue with tests.
+url=$(cf app "aws-broker-smoke-tests-fill-storage" | grep routes | awk '{print $2}')
 
-# import table from s3
-#   https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PostgreSQL.S3Import.html
-# try an insert to verify that it's full
-# try another update operation to verify it can't be done?
-# cf update-service "rds-smoke-tests-db-storage-full-storage-full-$SERVICE_PLAN" TODO
+# repeatedly check if the database is full.
+while true; do
+  if curl "${url}/db" | grep -q true; then
+    break
+  fi
+done
+
+# increase instance storage.
+cf update-service "rds-smoke-tests-db-storage-full-$SERVICE_PLAN" -c '{"storage": 12}'
 
 # Wait to make sure that the service instance has been successfully updated.
 wait_for_service_instance "rds-smoke-tests-db-storage-full-$SERVICE_PLAN"
 
-# Clean up app and service
+# Clean up app and service.
 cf delete -f "smoke-tests-storage-full-$SERVICE_PLAN"
+cf delete -f "aws-broker-smoke-tests-fill-storage"
 cf delete-service -f "rds-smoke-tests-db-storage-full-$SERVICE_PLAN"

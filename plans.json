@@ -1,0 +1,104 @@
+{
+  "name": "shared-psql",
+  "instanceClass": null
+}
+{
+  "name": "micro-psql",
+  "instanceClass": "db.t3.micro"
+}
+{
+  "name": "micro-psql-redundant",
+  "instanceClass": "db.t3.micro"
+}
+{
+  "name": "small-psql",
+  "instanceClass": "db.t3.small"
+}
+{
+  "name": "small-psql-redundant",
+  "instanceClass": "db.t3.small"
+}
+{
+  "name": "medium-psql",
+  "instanceClass": "db.t3.medium"
+}
+{
+  "name": "medium-psql-redundant",
+  "instanceClass": "db.t3.medium"
+}
+{
+  "name": "medium-gp-psql",
+  "instanceClass": "db.m5.large"
+}
+{
+  "name": "medium-gp-psql-redundant",
+  "instanceClass": "db.m5.large"
+}
+{
+  "name": "large-gp-psql",
+  "instanceClass": "db.m5.large"
+}
+{
+  "name": "large-gp-psql-redundant",
+  "instanceClass": "db.m5.large"
+}
+{
+  "name": "xlarge-gp-psql",
+  "instanceClass": "db.m5.xlarge"
+}
+{
+  "name": "xlarge-gp-psql-redundant",
+  "instanceClass": "db.m5.xlarge"
+}
+{
+  "name": "shared-mysql",
+  "instanceClass": null
+}
+{
+  "name": "small-mysql",
+  "instanceClass": "db.t2.small"
+}
+{
+  "name": "small-mysql-redundant",
+  "instanceClass": "db.t2.small"
+}
+{
+  "name": "medium-mysql",
+  "instanceClass": "db.t2.medium"
+}
+{
+  "name": "medium-mysql-redundant",
+  "instanceClass": "db.t2.medium"
+}
+{
+  "name": "medium-gp-mysql",
+  "instanceClass": "db.m5.large"
+}
+{
+  "name": "medium-gp-mysql-redundant",
+  "instanceClass": "db.m5.large"
+}
+{
+  "name": "large-gp-mysql",
+  "instanceClass": "db.m5.large"
+}
+{
+  "name": "large-gp-mysql-redundant",
+  "instanceClass": "db.m5.large"
+}
+{
+  "name": "xlarge-gp-mysql",
+  "instanceClass": "db.m5.xlarge"
+}
+{
+  "name": "xlarge-gp-mysql-redundant",
+  "instanceClass": "db.m5.xlarge"
+}
+{
+  "name": "medium-oracle-se2",
+  "instanceClass": "db.t3.medium"
+}
+{
+  "name": "large-gp-sqlserver-se",
+  "instanceClass": "db.m5.large"
+}
