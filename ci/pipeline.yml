@@ -22,7 +22,7 @@ jobs:
       STACK_NAME: ((development-stack-name))
       S3_TFSTATE_BUCKET: ((development-s3-tfstate-bucket))
       AWS_DEFAULT_REGION: us-gov-west-1
-      
+
       TF_VAR_base_stack: ((development-stack-base))
       TF_VAR_stack_description: ((development-stack-name))
       TF_VAR_remote_state_bucket: ((development-s3-tfstate-bucket))
@@ -165,8 +165,58 @@ jobs:
     - get: aws-db-test
   - in_parallel:
       steps:
-      - task: smoke-tests-postgres
-        file: aws-broker-app/ci/run-smoke-tests.yml
+      # - task: smoke-tests-postgres
+      #   file: aws-broker-app/ci/run-smoke-tests.yml
+      #   params:
+      #     BROKER_NAME: ((development-broker-name))
+      #     CF_API_URL: ((development-cf-api-url))
+      #     CF_USERNAME: ((development-cf-deploy-username))
+      #     CF_PASSWORD: ((development-cf-deploy-password))
+      #     CF_ORGANIZATION: ((development-cf-organization))
+      #     CF_SPACE: ((development-cf-space))
+      #     SERVICE_PLAN: micro-psql
+      #     DB_TYPE: postgres
+
+      # - task: smoke-tests-postgres-update-micro-to-small
+      #   file: aws-broker-app/ci/run-smoke-tests-db-updates.yml
+      #   params:
+      #     BROKER_NAME: ((development-broker-name))
+      #     CF_API_URL: ((development-cf-api-url))
+      #     CF_USERNAME: ((development-cf-deploy-username))
+      #     CF_PASSWORD: ((development-cf-deploy-password))
+      #     CF_ORGANIZATION: ((development-cf-organization))
+      #     CF_SPACE: ((development-cf-space))
+      #     SERVICE_PLAN: micro-psql
+      #     NEW_SERVICE_PLAN: small-psql
+      #     DB_TYPE: postgres
+
+      # - task: smoke-tests-postgres-version
+      #   file: aws-broker-app/ci/run-smoke-tests-db-version.yml
+      #   params:
+      #     BROKER_NAME: ((development-broker-name))
+      #     CF_API_URL: ((development-cf-api-url))
+      #     CF_USERNAME: ((development-cf-deploy-username))
+      #     CF_PASSWORD: ((development-cf-deploy-password))
+      #     CF_ORGANIZATION: ((development-cf-organization))
+      #     CF_SPACE: ((development-cf-space))
+      #     SERVICE_PLAN: micro-psql
+      #     DB_TYPE: postgres
+      #     DB_VERSION: 11
+
+      # - task: smoke-tests-postgres-update-storage
+      #   file: aws-broker-app/ci/run-smoke-tests-update-storage.yml
+      #   params:
+      #     BROKER_NAME: ((development-broker-name))
+      #     CF_API_URL: ((development-cf-api-url))
+      #     CF_USERNAME: ((development-cf-deploy-username))
+      #     CF_PASSWORD: ((development-cf-deploy-password))
+      #     CF_ORGANIZATION: ((development-cf-organization))
+      #     CF_SPACE: ((development-cf-space))
+      #     SERVICE_PLAN: micro-psql
+      #     DB_TYPE: postgres
+
+      - task: smoke-tests-postgres-db-storage-full
+        file: aws-broker-app/ci/run-smoke-tests-db-storage-full.yml
         params:
           BROKER_NAME: ((development-broker-name))
           CF_API_URL: ((development-cf-api-url))
@@ -177,157 +227,119 @@ jobs:
           SERVICE_PLAN: micro-psql
           DB_TYPE: postgres
 
-      - task: smoke-tests-postgres-update-micro-to-small
-        file: aws-broker-app/ci/run-smoke-tests-db-updates.yml
-        params:
-          BROKER_NAME: ((development-broker-name))
-          CF_API_URL: ((development-cf-api-url))
-          CF_USERNAME: ((development-cf-deploy-username))
-          CF_PASSWORD: ((development-cf-deploy-password))
-          CF_ORGANIZATION: ((development-cf-organization))
-          CF_SPACE: ((development-cf-space))
-          SERVICE_PLAN: micro-psql
-          NEW_SERVICE_PLAN: small-psql
-          DB_TYPE: postgres
+      # - task: smoke-tests-mysql
+      #   file: aws-broker-app/ci/run-smoke-tests.yml
+      #   params:
+      #     BROKER_NAME: ((development-broker-name))
+      #     CF_API_URL: ((development-cf-api-url))
+      #     CF_USERNAME: ((development-cf-deploy-username))
+      #     CF_PASSWORD: ((development-cf-deploy-password))
+      #     CF_ORGANIZATION: ((development-cf-organization))
+      #     CF_SPACE: ((development-cf-space))
+      #     SERVICE_PLAN: small-mysql
+      #     DB_TYPE: mysql
 
-      - task: smoke-tests-postgres-version
-        file: aws-broker-app/ci/run-smoke-tests-db-version.yml
-        params:
-          BROKER_NAME: ((development-broker-name))
-          CF_API_URL: ((development-cf-api-url))
-          CF_USERNAME: ((development-cf-deploy-username))
-          CF_PASSWORD: ((development-cf-deploy-password))
-          CF_ORGANIZATION: ((development-cf-organization))
-          CF_SPACE: ((development-cf-space))
-          SERVICE_PLAN: micro-psql
-          DB_TYPE: postgres
-          DB_VERSION: 11
+      # - task: smoke-tests-mysql-update-small-to-medium
+      #   file: aws-broker-app/ci/run-smoke-tests-db-updates.yml
+      #   params:
+      #     BROKER_NAME: ((development-broker-name))
+      #     CF_API_URL: ((development-cf-api-url))
+      #     CF_USERNAME: ((development-cf-deploy-username))
+      #     CF_PASSWORD: ((development-cf-deploy-password))
+      #     CF_ORGANIZATION: ((development-cf-organization))
+      #     CF_SPACE: ((development-cf-space))
+      #     SERVICE_PLAN: small-mysql
+      #     NEW_SERVICE_PLAN: medium-mysql
+      #     DB_TYPE: mysql
 
-      - task: smoke-tests-postgres-update-storage
-        file: aws-broker-app/ci/run-smoke-tests-update-storage.yml
-        params:
-          BROKER_NAME: ((development-broker-name))
-          CF_API_URL: ((development-cf-api-url))
-          CF_USERNAME: ((development-cf-deploy-username))
-          CF_PASSWORD: ((development-cf-deploy-password))
-          CF_ORGANIZATION: ((development-cf-organization))
-          CF_SPACE: ((development-cf-space))
-          SERVICE_PLAN: micro-psql
-          DB_TYPE: postgres
+      # - task: smoke-tests-mysql-version
+      #   file: aws-broker-app/ci/run-smoke-tests-db-version.yml
+      #   params:
+      #     BROKER_NAME: ((development-broker-name))
+      #     CF_API_URL: ((development-cf-api-url))
+      #     CF_USERNAME: ((development-cf-deploy-username))
+      #     CF_PASSWORD: ((development-cf-deploy-password))
+      #     CF_ORGANIZATION: ((development-cf-organization))
+      #     CF_SPACE: ((development-cf-space))
+      #     SERVICE_PLAN: small-mysql
+      #     DB_TYPE: mysql
+      #     DB_VERSION: 5.7
 
-      - task: smoke-tests-mysql
-        file: aws-broker-app/ci/run-smoke-tests.yml
-        params:
-          BROKER_NAME: ((development-broker-name))
-          CF_API_URL: ((development-cf-api-url))
-          CF_USERNAME: ((development-cf-deploy-username))
-          CF_PASSWORD: ((development-cf-deploy-password))
-          CF_ORGANIZATION: ((development-cf-organization))
-          CF_SPACE: ((development-cf-space))
-          SERVICE_PLAN: small-mysql
-          DB_TYPE: mysql
+      # - task: smoke-tests-mysql-update-storage
+      #   file: aws-broker-app/ci/run-smoke-tests-update-storage.yml
+      #   params:
+      #     BROKER_NAME: ((development-broker-name))
+      #     CF_API_URL: ((development-cf-api-url))
+      #     CF_USERNAME: ((development-cf-deploy-username))
+      #     CF_PASSWORD: ((development-cf-deploy-password))
+      #     CF_ORGANIZATION: ((development-cf-organization))
+      #     CF_SPACE: ((development-cf-space))
+      #     SERVICE_PLAN: small-mysql
+      #     DB_TYPE: mysql
 
-      - task: smoke-tests-mysql-update-small-to-medium
-        file: aws-broker-app/ci/run-smoke-tests-db-updates.yml
-        params:
-          BROKER_NAME: ((development-broker-name))
-          CF_API_URL: ((development-cf-api-url))
-          CF_USERNAME: ((development-cf-deploy-username))
-          CF_PASSWORD: ((development-cf-deploy-password))
-          CF_ORGANIZATION: ((development-cf-organization))
-          CF_SPACE: ((development-cf-space))
-          SERVICE_PLAN: small-mysql
-          NEW_SERVICE_PLAN: medium-mysql
-          DB_TYPE: mysql
+      # - task: smoke-tests-oracle
+      #   file: aws-broker-app/ci/run-smoke-tests.yml
+      #   params:
+      #     BROKER_NAME: ((development-broker-name))
+      #     CF_API_URL: ((development-cf-api-url))
+      #     CF_USERNAME: ((development-cf-deploy-username))
+      #     CF_PASSWORD: ((development-cf-deploy-password))
+      #     CF_ORGANIZATION: ((development-cf-organization))
+      #     CF_SPACE: ((development-cf-space))
+      #     SERVICE_PLAN: medium-oracle-se2
+      #     DB_TYPE: oracle-se2
 
-      - task: smoke-tests-mysql-version
-        file: aws-broker-app/ci/run-smoke-tests-db-version.yml
-        params:
-          BROKER_NAME: ((development-broker-name))
-          CF_API_URL: ((development-cf-api-url))
-          CF_USERNAME: ((development-cf-deploy-username))
-          CF_PASSWORD: ((development-cf-deploy-password))
-          CF_ORGANIZATION: ((development-cf-organization))
-          CF_SPACE: ((development-cf-space))
-          SERVICE_PLAN: small-mysql
-          DB_TYPE: mysql
-          DB_VERSION: 5.7
+      # - task: smoke-tests-redis
+      #   file: aws-broker-app/ci/run-smoke-test-task.yml
+      #   params:
+      #     BROKER_NAME: ((development-broker-name))
+      #     CF_API_URL: ((development-cf-api-url))
+      #     CF_USERNAME: ((development-cf-deploy-username))
+      #     CF_PASSWORD: ((development-cf-deploy-password))
+      #     CF_ORGANIZATION: ((development-cf-organization))
+      #     CF_SPACE: ((development-cf-space))
+      #     SERVICE_NAME: aws-elasticache-redis
+      #     SERVICE_PLAN: redis-dev
+      #     REGION: ((development-aws-default-region))
 
-      - task: smoke-tests-mysql-update-storage
-        file: aws-broker-app/ci/run-smoke-tests-update-storage.yml
-        params:
-          BROKER_NAME: ((development-broker-name))
-          CF_API_URL: ((development-cf-api-url))
-          CF_USERNAME: ((development-cf-deploy-username))
-          CF_PASSWORD: ((development-cf-deploy-password))
-          CF_ORGANIZATION: ((development-cf-organization))
-          CF_SPACE: ((development-cf-space))
-          SERVICE_PLAN: small-mysql
-          DB_TYPE: mysql
+      # - task: smoke-tests-unbound-elasticsearch
+      #   file: aws-broker-app/ci/run-smoke-test-unbound.yml
+      #   params:
+      #     BROKER_NAME: ((development-broker-name))
+      #     CF_API_URL: ((development-cf-api-url))
+      #     CF_USERNAME: ((development-cf-deploy-username))
+      #     CF_PASSWORD: ((development-cf-deploy-password))
+      #     CF_ORGANIZATION: ((development-cf-organization))
+      #     CF_SPACE: ((development-cf-space))
+      #     SERVICE_NAME: aws-elasticsearch
+      #     SERVICE_PLAN: es-dev
+      #     REGION: ((development-aws-default-region))
 
-      - task: smoke-tests-oracle
-        file: aws-broker-app/ci/run-smoke-tests.yml
-        params:
-          BROKER_NAME: ((development-broker-name))
-          CF_API_URL: ((development-cf-api-url))
-          CF_USERNAME: ((development-cf-deploy-username))
-          CF_PASSWORD: ((development-cf-deploy-password))
-          CF_ORGANIZATION: ((development-cf-organization))
-          CF_SPACE: ((development-cf-space))
-          SERVICE_PLAN: medium-oracle-se2
-          DB_TYPE: oracle-se2
+      # - task: smoke-tests-elasticsearch
+      #   file: aws-broker-app/ci/run-smoke-test-task.yml
+      #   params:
+      #     BROKER_NAME: ((development-broker-name))
+      #     CF_API_URL: ((development-cf-api-url))
+      #     CF_USERNAME: ((development-cf-deploy-username))
+      #     CF_PASSWORD: ((development-cf-deploy-password))
+      #     CF_ORGANIZATION: ((development-cf-organization))
+      #     CF_SPACE: ((development-cf-space))
+      #     SERVICE_NAME: aws-elasticsearch
+      #     SERVICE_PLAN: es-dev
+      #     REGION: ((development-aws-default-region))
 
-      - task: smoke-tests-redis
-        file: aws-broker-app/ci/run-smoke-test-task.yml
-        params:
-          BROKER_NAME: ((development-broker-name))
-          CF_API_URL: ((development-cf-api-url))
-          CF_USERNAME: ((development-cf-deploy-username))
-          CF_PASSWORD: ((development-cf-deploy-password))
-          CF_ORGANIZATION: ((development-cf-organization))
-          CF_SPACE: ((development-cf-space))
-          SERVICE_NAME: aws-elasticache-redis
-          SERVICE_PLAN: redis-dev
-          REGION: ((development-aws-default-region))
-
-      - task: smoke-tests-unbound-elasticsearch
-        file: aws-broker-app/ci/run-smoke-test-unbound.yml
-        params:
-          BROKER_NAME: ((development-broker-name))
-          CF_API_URL: ((development-cf-api-url))
-          CF_USERNAME: ((development-cf-deploy-username))
-          CF_PASSWORD: ((development-cf-deploy-password))
-          CF_ORGANIZATION: ((development-cf-organization))
-          CF_SPACE: ((development-cf-space))
-          SERVICE_NAME: aws-elasticsearch
-          SERVICE_PLAN: es-dev
-          REGION: ((development-aws-default-region))
-
-      - task: smoke-tests-elasticsearch
-        file: aws-broker-app/ci/run-smoke-test-task.yml
-        params:
-          BROKER_NAME: ((development-broker-name))
-          CF_API_URL: ((development-cf-api-url))
-          CF_USERNAME: ((development-cf-deploy-username))
-          CF_PASSWORD: ((development-cf-deploy-password))
-          CF_ORGANIZATION: ((development-cf-organization))
-          CF_SPACE: ((development-cf-space))
-          SERVICE_NAME: aws-elasticsearch
-          SERVICE_PLAN: es-dev
-          REGION: ((development-aws-default-region))
-
-      - task: smoke-tests-elasticsearch-advanced-options
-        file: aws-broker-app/ci/run-smoke-test-es-advanced-options.yml
-        params:
-          BROKER_NAME: ((development-broker-name))
-          CF_API_URL: ((development-cf-api-url))
-          CF_USERNAME: ((development-cf-deploy-username))
-          CF_PASSWORD: ((development-cf-deploy-password))
-          CF_ORGANIZATION: ((development-cf-organization))
-          CF_SPACE: ((development-cf-space))
-          SERVICE_NAME: aws-elasticsearch
-          SERVICE_PLAN: es-dev
-          REGION: ((development-aws-default-region))
+      # - task: smoke-tests-elasticsearch-advanced-options
+      #   file: aws-broker-app/ci/run-smoke-test-es-advanced-options.yml
+      #   params:
+      #     BROKER_NAME: ((development-broker-name))
+      #     CF_API_URL: ((development-cf-api-url))
+      #     CF_USERNAME: ((development-cf-deploy-username))
+      #     CF_PASSWORD: ((development-cf-deploy-password))
+      #     CF_ORGANIZATION: ((development-cf-organization))
+      #     CF_SPACE: ((development-cf-space))
+      #     SERVICE_NAME: aws-elasticsearch
+      #     SERVICE_PLAN: es-dev
+      #     REGION: ((development-aws-default-region))
   on_success:
     put: slack
     params:
@@ -368,7 +380,7 @@ jobs:
       STACK_NAME: ((staging-stack-name))
       S3_TFSTATE_BUCKET: ((staging-s3-tfstate-bucket))
       AWS_DEFAULT_REGION: us-gov-west-1
-      
+
       TF_VAR_base_stack: ((staging-stack-base))
       TF_VAR_stack_description: ((staging-stack-name))
       TF_VAR_remote_state_bucket: ((staging-s3-tfstate-bucket))
@@ -411,10 +423,10 @@ jobs:
       TF_VAR_rds_shared_postgres_password: ((staging-rds-shared-postgres-password))
       TF_VAR_rds_shared_postgres_apply_immediately: "true"
       TF_VAR_rds_shared_postgres_allow_major_version_upgrade: "true"
-      
+
       TF_VAR_snapshot_expiration: 7
       TF_VAR_platform_access_role_arn: ((staging-platform-role-arn))
-      
+
   - task: init-shared-db
     file: aws-broker-app/ci/init-shared-db.yml
     params:
@@ -565,6 +577,18 @@ jobs:
           CF_SPACE: ((staging-cf-space))
           SERVICE_PLAN: micro-psql
           NEW_SERVICE_PLAN: medium-psql
+          DB_TYPE: postgres
+
+      - task: smoke-tests-postgres-db-storage-full
+        file: aws-broker-app/ci/run-smoke-tests-db-storage-full.yml
+        params:
+          BROKER_NAME: ((staging-broker-name))
+          CF_API_URL: ((staging-cf-api-url))
+          CF_USERNAME: ((staging-cf-deploy-username))
+          CF_PASSWORD: ((staging-cf-deploy-password))
+          CF_ORGANIZATION: ((staging-cf-organization))
+          CF_SPACE: ((staging-cf-space))
+          SERVICE_PLAN: micro-psql
           DB_TYPE: postgres
 
       - task: smoke-tests-postgres-version
@@ -789,7 +813,7 @@ jobs:
       TF_VAR_rds_shared_postgres_password: ((prod-rds-shared-postgres-password))
       TF_VAR_rds_shared_postgres_apply_immediately: "true"
       TF_VAR_rds_shared_postgres_allow_major_version_upgrade: "true"
-      
+
       TF_VAR_snapshot_expiration: 14
       TF_VAR_platform_access_role_arn: ((prod-platform-role-arn))
 
@@ -985,6 +1009,18 @@ jobs:
           SERVICE_PLAN: micro-psql
           DB_TYPE: postgres
 
+      - task: smoke-tests-postgres-db-storage-full
+        file: aws-broker-app/ci/run-smoke-tests-db-storage-full.yml
+        params:
+          BROKER_NAME: ((prod-broker-name))
+          CF_API_URL: ((prod-cf-api-url))
+          CF_USERNAME: ((prod-cf-deploy-username))
+          CF_PASSWORD: ((prod-cf-deploy-password))
+          CF_ORGANIZATION: ((prod-cf-organization))
+          CF_SPACE: ((prod-cf-space))
+          SERVICE_PLAN: micro-psql
+          DB_TYPE: postgres
+
       - task: smoke-tests-postgres-version
         file: aws-broker-app/ci/run-smoke-tests-db-version.yml
         params:
@@ -1143,7 +1179,7 @@ jobs:
       channel: '#cg-platform'
       username: ((slack-username))
       icon_url: ((slack-icon-url))
-      
+
 resources:
 - name: pipeline-tasks
   type: git
