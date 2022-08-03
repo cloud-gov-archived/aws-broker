@@ -55,7 +55,7 @@ cf push "smoke-tests-storage-full-${SERVICE_PLAN}"
 
 # push the database filling app
 popd
-pushd smoke-tests/aws-rds/update-storage-full
+pushd aws-broker-app/ci/smoke-tests/aws-rds/update-storage-full
 cf push "aws-broker-smoke-tests-fill-storage" -f manifest.yml --no-start
 cf bind-service "aws-broker-smoke-tests-fill-storage" "rds-smoke-tests-db-storage-full-$SERVICE_PLAN"
 cf push "aws-broker-smoke-tests-fill-storage"
@@ -67,6 +67,7 @@ while true; do
   if curl "${url}/db" | grep -q true; then
     break
   fi
+  sleep 30
 done
 
 # increase instance storage.

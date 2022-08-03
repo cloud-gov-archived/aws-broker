@@ -1,6 +1,6 @@
 ---
 applications:
-- name: aws-broker-smoke-tests-storage-full
+- name: aws-broker-smoke-tests-fill-storage
   buildpack: go_buildpack
   memory: 256M
   env:
