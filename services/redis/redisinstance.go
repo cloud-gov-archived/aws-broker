@@ -121,7 +121,6 @@ func (i *RedisInstance) init(uuid string,
 		return err
 	}
         // Set the DB Version
-	// Currently only supported for MySQL and PostgreSQL instances.
 	if options.EngineVersion != "" {
 		i.EngineVersion = options.EngineVersion
 	} else {
