@@ -1244,7 +1244,7 @@ redis:
         service: "aws-broker"
     - id: "3nd227bf-sm4c-44c1-0b81-575fel666443"
       name: "redis-3node-large"
-      description: "AWS Elasticache Redis 6.2 Three node"
+      description: "AWS Elasticache Redis Three node"
       metadata:
         bullets:
           - "Elasticache"
