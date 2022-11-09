@@ -1166,7 +1166,6 @@ redis:
       numberCluster: 1
       nodeType: cache.t3.micro
       subnetGroup: (( grab meta.redis.subnet_group ))
-      parameterGroup: ""
       preferredMaintenanceWindow: mon:07:00-mon:08:00
       snapshotWindow: 06:00-07:00
       snapshotRetentionLimit: 1
@@ -1201,7 +1200,6 @@ redis:
       numberCluster: 3
       nodeType: cache.t3.micro
       subnetGroup: (( grab meta.redis.subnet_group ))
-      parameterGroup: ""
       preferredMaintenanceWindow: mon:07:00-mon:08:00
       snapshotWindow: 06:00-07:00
       snapshotRetentionLimit: 3
@@ -1236,7 +1234,6 @@ redis:
       numberCluster: 5
       nodeType: cache.t3.micro
       subnetGroup: (( grab meta.redis.subnet_group ))
-      parameterGroup: ""
       preferredMaintenanceWindow: mon:07:00-mon:08:00
       snapshotWindow: 06:00-07:00
       snapshotRetentionLimit: 3
@@ -1271,7 +1268,6 @@ redis:
       numberCluster: 3
       nodeType: cache.t3.small
       subnetGroup: (( grab meta.redis.subnet_group ))
-      parameterGroup: ""
       preferredMaintenanceWindow: mon:07:00-mon:08:00
       snapshotWindow: 06:00-07:00
       snapshotRetentionLimit: 3
@@ -1306,7 +1302,6 @@ redis:
       numberCluster: 5
       nodeType: cache.t3.small
       subnetGroup: (( grab meta.redis.subnet_group ))
-      parameterGroup: ""
       preferredMaintenanceWindow: mon:07:00-mon:08:00
       snapshotWindow: 06:00-07:00
       snapshotRetentionLimit: 3
