@@ -1159,6 +1159,7 @@ redis:
       securityGroup: (( grab meta.redis.security_group ))
       engineVersion: 6.2
       approvedMajorVersions:
+        - "7.0"
         - "6.2"
         - "6.0"
         - "5.0.6"
@@ -1193,6 +1194,7 @@ redis:
       securityGroup: (( grab meta.redis.security_group ))
       engineVersion: 6.2
       approvedMajorVersions:
+        - "7.0"
         - "6.2"
         - "6.0"
         - "5.0.6"
@@ -1227,6 +1229,7 @@ redis:
       securityGroup: (( grab meta.redis.security_group ))
       engineVersion: 6.2
       approvedMajorVersions:
+        - "7.0"
         - "6.2"
         - "6.0"
         - "5.0.6"
@@ -1261,6 +1264,7 @@ redis:
       securityGroup: (( grab meta.redis.security_group ))
       engineVersion: 6.2
       approvedMajorVersions:
+        - "7.0"
         - "6.2"
         - "6.0"
         - "5.0.6"
@@ -1295,6 +1299,7 @@ redis:
       securityGroup: (( grab meta.redis.security_group ))
       engineVersion: 6.2
       approvedMajorVersions:
+        - "7.0"
         - "6.2"
         - "6.0"
         - "5.0.6"
