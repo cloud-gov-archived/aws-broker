@@ -125,7 +125,6 @@ func (d *dedicatedRedisAdapter) createRedis(i *RedisInstance, password string) (
 		Engine:                      aws.String("redis"),
 		NumCacheClusters:            aws.Int64(int64(i.NumCacheClusters)),
 		Port:                        aws.Int64(6379),
-		CacheParameterGroupName:     aws.String(i.ParameterGroup),
 		PreferredMaintenanceWindow:  aws.String(i.PreferredMaintenanceWindow),
 		SnapshotWindow:              aws.String(i.SnapshotWindow),
 		SnapshotRetentionLimit:      aws.Int64(int64(i.SnapshotRetentionLimit)),
