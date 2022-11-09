@@ -129,7 +129,6 @@ func (i *RedisInstance) init(uuid string,
 	}
         i.NumCacheClusters = plan.NumCacheClusters
 	i.CacheNodeType = plan.CacheNodeType
-	// i.ParameterGroup = plan.ParameterGroup
 	i.PreferredMaintenanceWindow = plan.PreferredMaintenanceWindow
 	i.SnapshotWindow = plan.SnapshotWindow
 	i.SnapshotRetentionLimit = plan.SnapshotRetentionLimit
