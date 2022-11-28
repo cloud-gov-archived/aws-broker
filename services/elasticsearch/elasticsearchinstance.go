@@ -15,7 +15,7 @@ import (
 	"github.com/18F/aws-broker/config"
 )
 
-// ElasticsearchInstance represents the information of an Elasticsearch Service instance.
+// Instance represents the information of an Elasticsearch Service instance.
 type Instance struct {
 	base.Instance
 
@@ -60,7 +60,7 @@ type Instance struct {
 	SecGroup    string            `sql:"-"`
 }
 
-func (i *ElasticsearchInstance) setPassword(password, key string) error {
+func (i *Instance) setPassword(password, key string) error {
 	if i.Salt == "" {
 		return errors.New("Salt has to be set before writing the password")
 	}
@@ -78,7 +78,7 @@ func (i *ElasticsearchInstance) setPassword(password, key string) error {
 	return nil
 }
 
-func (i *ElasticsearchInstance) getPassword(key string) (string, error) {
+func (i *Instance) getPassword(key string) (string, error) {
 	if i.Salt == "" || i.Password == "" {
 		return "", errors.New("Salt and password has to be set before writing the password")
 	}
@@ -93,7 +93,7 @@ func (i *ElasticsearchInstance) getPassword(key string) (string, error) {
 	return decrypted, nil
 }
 
-func (i *ElasticsearchInstance) getCredentials(password string) (map[string]string, error) {
+func (i *Instance) getCredentials(password string) (map[string]string, error) {
 	var credentials map[string]string
 
 	uri := fmt.Sprintf("https://%s:443",
@@ -121,13 +121,13 @@ func (i *ElasticsearchInstance) getCredentials(password string) (map[string]stri
 	return credentials, nil
 }
 
-func (i *ElasticsearchInstance) setBucket(bucket string) error {
+func (i *Instance) setBucket(bucket string) error {
 	i.Bucket = bucket
 
 	return nil
 }
 
-func (i *ElasticsearchInstance) init(uuid string,
+func (i *Instance) init(uuid string,
 	orgGUID string,
 	spaceGUID string,
 	serviceID string,
@@ -181,7 +181,7 @@ func (i *ElasticsearchInstance) init(uuid string,
 	return nil
 }
 
-func (i *ElasticsearchInstance) update(
+func (i *Instance) update(
 	options ElasticsearchOptions,
 ) error {
 
