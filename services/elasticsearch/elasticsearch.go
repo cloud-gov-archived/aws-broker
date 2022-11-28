@@ -29,37 +29,37 @@ import (
 )
 
 type ElasticsearchAdapter interface {
-	createsearch(i *searchInstance, password string) (base.InstanceState, error)
-	modifysearch(i *searchInstance, password string) (base.InstanceState, error)
-	checkStatus(i *searchInstance) (base.InstanceState, error)
-	bindsearchToApp(i *searchInstance, password string) (map[string]string, error)
-	deletesearch(i *searchInstance, passoword string, queue *taskqueue.QueueManager) (base.InstanceState, error)
+	createsearch(i *instance, password string) (base.InstanceState, error)
+	modifysearch(i *instance, password string) (base.InstanceState, error)
+	checkStatus(i *instance) (base.InstanceState, error)
+	bindsearchToApp(i *instance, password string) (map[string]string, error)
+	deletesearch(i *instance, passoword string, queue *taskqueue.QueueManager) (base.InstanceState, error)
 }
 
 type mockElasticsearchAdapter struct {
 }
 
-func (d *mockElasticsearchAdapter) createsearch(i *searchInstance, password string) (base.InstanceState, error) {
+func (d *mockElasticsearchAdapter) createsearch(i *instance, password string) (base.InstanceState, error) {
 	// TODO
 	return base.InstanceReady, nil
 }
 
-func (d *mockElasticsearchAdapter) modifysearch(i *searchInstance, password string) (base.InstanceState, error) {
+func (d *mockElasticsearchAdapter) modifysearch(i *instance, password string) (base.InstanceState, error) {
 	// TODO
 	return base.InstanceReady, nil
 }
 
-func (d *mockElasticsearchAdapter) checkStatus(i *searchInstance) (base.InstanceState, error) {
+func (d *mockElasticsearchAdapter) checkStatus(i *instance) (base.InstanceState, error) {
 	// TODO
 	return base.InstanceReady, nil
 }
 
-func (d *mockElasticsearchAdapter) bindsearchToApp(i *searchInstance, password string) (map[string]string, error) {
+func (d *mockElasticsearchAdapter) bindsearchToApp(i *instance, password string) (map[string]string, error) {
 	// TODO
 	return i.getCredentials(password)
 }
 
-func (d *mockElasticsearchAdapter) deletesearch(i *searchInstance, password string, queue *taskqueue.QueueManager) (base.InstanceState, error) {
+func (d *mockElasticsearchAdapter) deletesearch(i *instance, password string, queue *taskqueue.QueueManager) (base.InstanceState, error) {
 	// TODO
 	return base.InstanceGone, nil
 }
@@ -68,15 +68,15 @@ func (d *mockElasticsearchAdapter) deletesearch(i *searchInstance, password stri
 	SharedElasticsearchConn *gorm.DB
 }
 
-func (d *sharedElasticsearchAdapter) createDB(i *searchInstance, password string) (base.InstanceState, error) {
+func (d *sharedElasticsearchAdapter) createDB(i *instance, password string) (base.InstanceState, error) {
 	return base.InstanceReady, nil
 }
 
-func (d *sharedElasticsearchAdapter) bindDBToApp(i *searchInstance, password string) (map[string]string, error) {
+func (d *sharedElasticsearchAdapter) bindDBToApp(i *instance, password string) (map[string]string, error) {
 	return i.getCredentials(password)
 }
 
-func (d *sharedElasticsearchAdapter) deleteRedis(i *searchInstance) (base.InstanceState, error) {
+func (d *sharedElasticsearchAdapter) deleteRedis(i *instance) (base.InstanceState, error) {
 	return base.InstanceGone, nil
 } */
 
@@ -89,7 +89,7 @@ type dedicatedsearchAdapter struct {
 // This is the prefix for all pgroups created by the broker.
 const PgroupPrefix = "cg-elasticsearch-broker-"
 
-func (d *dedicatedsearchAdapter) createsearch(i *searchInstance, password string) (base.InstanceState, error) {
+func (d *dedicatedsearchAdapter) createsearch(i *instance, password string) (base.InstanceState, error) {
 	svc := opensearchservice.New(session.New(), aws.NewConfig().WithRegion(d.settings.Region))
 	iamsvc := iam.New(session.New(), aws.NewConfig().WithRegion(d.settings.Region))
 	logger := lager.NewLogger("aws-broker")
@@ -271,7 +271,7 @@ func (d *dedicatedsearchAdapter) createsearch(i *searchInstance, password string
 	return base.InstanceNotCreated, nil
 }
 
-func (d *dedicatedsearchAdapter) modifysearch(i *searchInstance, password string) (base.InstanceState, error) {
+func (d *dedicatedsearchAdapter) modifysearch(i *instance, password string) (base.InstanceState, error) {
 	svc := opensearchservice.New(session.New(), aws.NewConfig().WithRegion(d.settings.Region))
 
 	AdvancedOptions := make(map[string]*string)
@@ -296,7 +296,7 @@ func (d *dedicatedsearchAdapter) modifysearch(i *searchInstance, password string
 	return base.InstanceNotModified, err
 }
 
-func (d *dedicatedsearchAdapter) bindsearchToApp(i *searchInstance, password string) (map[string]string, error) {
+func (d *dedicatedsearchAdapter) bindsearchToApp(i *instance, password string) (map[string]string, error) {
 	// First, we need to check if the instance is up and available before binding.
 	// Only search for details if the instance was not indicated as ready.
 	if i.State != base.InstanceReady {
@@ -369,7 +369,7 @@ func (d *dedicatedsearchAdapter) bindsearchToApp(i *searchInstance, password str
 }
 
 // we make the deletion async, set status to in-progress and rollup to return a 202
-func (d *dedicatedsearchAdapter) deletesearch(i *searchInstance, password string, queue *taskqueue.QueueManager) (base.InstanceState, error) {
+func (d *dedicatedsearchAdapter) deletesearch(i *instance, password string, queue *taskqueue.QueueManager) (base.InstanceState, error) {
 	//check for backing resource and do async otherwise remove from db
 	svc := opensearchservice.New(session.New(), aws.NewConfig().WithRegion(d.settings.Region))
 	params := &opensearchservice.DescribeElasticsearchDomainInput{
@@ -400,7 +400,7 @@ func (d *dedicatedsearchAdapter) deletesearch(i *searchInstance, password string
 }
 
 // this should only be called in relation to async create, modify or delete operations polling for completion
-func (d *dedicatedsearchAdapter) checkStatus(i *searchInstance) (base.InstanceState, error) {
+func (d *dedicatedsearchAdapter) checkStatus(i *instance) (base.InstanceState, error) {
 	// First, we need to check if the instance state
 	// Only search for details if the instance was not indicated as ready.
 	if i.State != base.InstanceReady {
@@ -469,7 +469,7 @@ func (d *dedicatedsearchAdapter) didAwsCallSucceed(err error) bool {
 
 // utility to create roles and policies to enable snapshots in an s3 bucket
 // we pass bucket-name separately to enable reuse for client and broker buckets
-func (d *dedicatedsearchAdapter) createUpdateBucketRolesAndPolicies(i *searchInstance, bucket string, path string) error {
+func (d *dedicatedsearchAdapter) createUpdateBucketRolesAndPolicies(i *instance, bucket string, path string) error {
 	ip := iampolicy.NewIamPolicyHandler(d.settings.Region)
 	var snapshotRole *iam.Role
 
@@ -553,7 +553,7 @@ func (d *dedicatedsearchAdapter) createUpdateBucketRolesAndPolicies(i *searchIns
 }
 
 // state is persisted in the taskqueue for LastOperations polling.
-func (d *dedicatedsearchAdapter) asyncdeletesearchDomain(i *searchInstance, password string, jobstate chan taskqueue.AsyncJobMsg) {
+func (d *dedicatedsearchAdapter) asyncdeletesearchDomain(i *instance, password string, jobstate chan taskqueue.AsyncJobMsg) {
 	defer close(jobstate)
 
 	msg := taskqueue.AsyncJobMsg{
@@ -613,7 +613,7 @@ func (d *dedicatedsearchAdapter) asyncdeletesearchDomain(i *searchInstance, pass
 
 // in which we make the ES API call to take a snapshot
 // then poll for snapshot completetion, may block for a considerable time
-func (d *dedicatedsearchAdapter) takeLastSnapshot(i *searchInstance, password string) error {
+func (d *dedicatedsearchAdapter) takeLastSnapshot(i *instance, password string) error {
 
 	var sleep = 10 * time.Second
 	var creds map[string]string
@@ -687,7 +687,7 @@ func (d *dedicatedsearchAdapter) takeLastSnapshot(i *searchInstance, password st
 }
 
 //in which we clean up all the roles and policies for the ES domain
-func (d *dedicatedsearchAdapter) cleanupRolesAndPolicies(i *searchInstance) error {
+func (d *dedicatedsearchAdapter) cleanupRolesAndPolicies(i *instance) error {
 	iamsvc := iam.New(session.New(), aws.NewConfig().WithRegion(d.settings.Region))
 	logger := lager.NewLogger("aws-broker")
 	logger.RegisterSink(lager.NewWriterSink(os.Stdout, lager.INFO))
@@ -750,7 +750,7 @@ func (d *dedicatedsearchAdapter) cleanupRolesAndPolicies(i *searchInstance) erro
 }
 
 // in which we finally delete the ES Domain and wait for it to complete
-func (d *dedicatedsearchAdapter) cleanupElasticSearchDomain(i *searchInstance) error {
+func (d *dedicatedsearchAdapter) cleanupElasticSearchDomain(i *instance) error {
 	svc := opensearchservice.New(session.New(), aws.NewConfig().WithRegion(d.settings.Region))
 
 	params := &opensearchservice.deletesearchDomainInput{
@@ -795,7 +795,7 @@ func (d *dedicatedsearchAdapter) cleanupElasticSearchDomain(i *searchInstance) e
 
 // in which we Marshall the instance into Json and dump to a manifest file in the snapshot bucket
 // so to provide machine readable information for restoration.
-func (d *dedicatedsearchAdapter) writeManifestToS3(i *searchInstance, password string) error {
+func (d *dedicatedsearchAdapter) writeManifestToS3(i *instance, password string) error {
 	//  marshall instance to bytes.
 	data, err := json.Marshal(i)
 	if err != nil {
