@@ -16,7 +16,7 @@ import (
 )
 
 // ElasticsearchInstance represents the information of an Elasticsearch Service instance.
-type ElasticsearchInstance struct {
+type Instance struct {
 	base.Instance
 
 	Description string `sql:"size(255)"`
