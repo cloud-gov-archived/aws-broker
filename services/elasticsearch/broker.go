@@ -80,7 +80,7 @@ func (broker *elasticsearchBroker) AsyncOperationRequired(c *catalog.Catalog, i 
 }
 
 func (broker *elasticsearchBroker) CreateInstance(c *catalog.Catalog, id string, createRequest request.Request) response.Response {
-	newInstance := ElasticsearchInstance{}
+	newInstance := Instance{}
 
 	options := ElasticsearchOptions{}
 	if len(createRequest.RawParameters) > 0 {
@@ -144,7 +144,7 @@ func (broker *elasticsearchBroker) CreateInstance(c *catalog.Catalog, id string,
 func (broker *elasticsearchBroker) ModifyInstance(c *catalog.Catalog, id string, updateRequest request.Request, baseInstance base.Instance) response.Response {
 	// logger := lager.NewLogger("aws-broker")
 	// logger.RegisterSink(lager.NewWriterSink(os.Stdout, lager.DEBUG))
-	esInstance := ElasticsearchInstance{}
+	esInstance := Instance{}
 	options := ElasticsearchOptions{}
 	if len(updateRequest.RawParameters) > 0 {
 		err := json.Unmarshal(updateRequest.RawParameters, &options)
@@ -194,7 +194,7 @@ func (broker *elasticsearchBroker) ModifyInstance(c *catalog.Catalog, id string,
 }
 
 func (broker *elasticsearchBroker) LastOperation(c *catalog.Catalog, id string, baseInstance base.Instance, operation string) response.Response {
-	existingInstance := ElasticsearchInstance{}
+	existingInstance := Instance{}
 
 	var count int64
 	broker.brokerDB.Where("uuid = ?", id).First(&existingInstance).Count(&count)
@@ -252,7 +252,7 @@ func (broker *elasticsearchBroker) LastOperation(c *catalog.Catalog, id string, 
 }
 
 func (broker *elasticsearchBroker) BindInstance(c *catalog.Catalog, id string, bindRequest request.Request, baseInstance base.Instance) response.Response {
-	existingInstance := ElasticsearchInstance{}
+	existingInstance := Instance{}
 
 	options := ElasticsearchOptions{}
 	if len(bindRequest.RawParameters) > 0 {
@@ -312,7 +312,7 @@ func (broker *elasticsearchBroker) BindInstance(c *catalog.Catalog, id string, b
 }
 
 func (broker *elasticsearchBroker) DeleteInstance(c *catalog.Catalog, id string, baseInstance base.Instance) response.Response {
-	existingInstance := ElasticsearchInstance{}
+	existingInstance := Instance{}
 	var count int64
 	broker.brokerDB.Where("uuid = ?", id).First(&existingInstance).Count(&count)
 	if count == 0 {
