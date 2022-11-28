@@ -156,7 +156,7 @@ func (d *dedicatedsearchAdapter) createsearch(i *Instance, password string) (bas
 		AvailabilityZoneCount: aws.Int64(2),
 	}
 
-	esclusterconfig := &opensearchservice.ElasticsearchClusterConfig{
+	esclusterconfig := &opensearchservice.ClusterConfig{
 		InstanceType:  aws.String(i.InstanceType),
 		InstanceCount: aws.Int64(int64(i.DataCount)),
 	}
@@ -217,7 +217,7 @@ func (d *dedicatedsearchAdapter) createsearch(i *Instance, password string) (bas
 	}
 
 	// Standard Parameters
-	params := &opensearchservice.createDomainInput{
+	params := &opensearchservice.CreateDomainInput{
 		DomainName:                  aws.String(i.Domain),
 		EngineVersion:               aws.String(i.ElasticsearchVersion),
 		EBSOptions:                  ebsoptions,
@@ -232,7 +232,7 @@ func (d *dedicatedsearchAdapter) createsearch(i *Instance, password string) (bas
 
 	params.SetAccessPolicies(accessControlPolicy)
 
-	resp, err := svc.createsearchDomain(params)
+	resp, err := svc.CreateDomain(params)
 	// Pretty-print the response data.
 	fmt.Println(awsutil.StringValue(resp))
 	// Decide if AWS service call was successful
@@ -284,7 +284,7 @@ func (d *dedicatedsearchAdapter) modifysearch(i *Instance, password string) (bas
 		AdvancedOptions["indices.query.bool.max_clause_count"] = &i.IndicesQueryBoolMaxClauseCount
 	}
 	// Standard Parameters
-	params := &opensearchservice.UpdateElasticsearchDomainConfigInput{
+	params := &opensearchservice.UpdateDomainConfig{
 		DomainName:      aws.String(i.Domain),
 		AdvancedOptions: AdvancedOptions,
 	}

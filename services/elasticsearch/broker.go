@@ -55,7 +55,7 @@ func initializeAdapter(plan catalog.ElasticsearchPlan, s *config.Settings, c *ca
 		return elasticsearchAdapter, nil
 	}
 
-	elasticsearchAdapter = &dedicatedElasticsearchAdapter{
+	elasticsearchAdapter = &dedicatedsearchAdapter{
 		Plan:     plan,
 		settings: *s,
 		logger:   logger,
@@ -123,7 +123,7 @@ func (broker *elasticsearchBroker) CreateInstance(c *catalog.Catalog, id string,
 		return adapterErr
 	}
 	// Create the elasticsearch instance.
-	status, err := adapter.createElasticsearch(&newInstance, newInstance.ClearPassword)
+	status, err := adapter.createsearch(&newInstance, newInstance.ClearPassword)
 	if status == base.InstanceNotCreated {
 		desc := "There was an error creating the instance."
 		if err != nil {
@@ -185,7 +185,7 @@ func (broker *elasticsearchBroker) ModifyInstance(c *catalog.Catalog, id string,
 		return response.NewErrorResponse(http.StatusBadRequest, "Error updating Elasticsearch service instance")
 	}
 
-	_, err = adapter.modifyElasticsearch(&esInstance, esInstance.ClearPassword)
+	_, err = adapter.modifysearch(&esInstance, esInstance.ClearPassword)
 	if err != nil {
 		broker.logger.Error("AWS call updating instance failed", err)
 		return response.NewErrorResponse(http.StatusBadRequest, "Error updating Elasticsearch service instance")
@@ -225,7 +225,7 @@ func (broker *elasticsearchBroker) LastOperation(c *catalog.Catalog, id string, 
 		broker.logger.Debug(fmt.Sprintf("Deletion Job state: %s\n Message: %s\n", jobstate.State.String(), jobstate.Message))
 
 	default: //all other ops use synchronous checking of aws api
-		status, _ = adapter.checkElasticsearchStatus(&existingInstance)
+		status, _ = adapter.checksearchStatus(&existingInstance)
 		broker.brokerDB.Save(&existingInstance)
 
 	}
@@ -292,7 +292,7 @@ func (broker *elasticsearchBroker) BindInstance(c *catalog.Catalog, id string, b
 	// Bind the database instance to the application.
 	//originalInstanceState := existingInstance.State
 	existingInstance.setBucket(options.Bucket)
-	if credentials, err = adapter.bindElasticsearchToApp(&existingInstance, password); err != nil {
+	if credentials, err = adapter.bindsearchToApp(&existingInstance, password); err != nil {
 		desc := "There was an error binding the database instance to the application."
 		if err != nil {
 			desc = desc + " Error: " + err.Error()
@@ -334,7 +334,7 @@ func (broker *elasticsearchBroker) DeleteInstance(c *catalog.Catalog, id string,
 	}
 
 	// send async deletion request.
-	status, err := adapter.deleteElasticsearch(&existingInstance, password, broker.taskqueue)
+	status, err := adapter.deletesearch(&existingInstance, password, broker.taskqueue)
 	switch status {
 	case base.InstanceGone: // somehow the instance is gone already
 		broker.brokerDB.Unscoped().Delete(&existingInstance)
