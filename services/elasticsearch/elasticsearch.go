@@ -305,7 +305,7 @@ func (d *dedicatedsearchAdapter) bindsearchToApp(i *Instance, password string) (
 			DomainName: aws.String(i.Domain), // Required
 		}
 
-		resp, err := svc.DescribeElasticsearchDomain(params)
+		resp, err := svc.DescribeDomain(params)
 		if err != nil {
 			if awsErr, ok := err.(awserr.Error); ok {
 				// Generic AWS error with Code, Message, and original error (if any)
@@ -375,7 +375,7 @@ func (d *dedicatedsearchAdapter) deletesearch(i *Instance, password string, queu
 	params := &opensearchservice.DescribeDomain{
 		DomainName: aws.String(i.Domain), // Required
 	}
-	_, err := svc.DescribeElasticsearchDomain(params)
+	_, err := svc.DescribeDomain(params)
 	if err != nil {
 		if awsErr, ok := err.(awserr.Error); ok {
 			// Generic AWS error with Code, Message, and original error (if any)
@@ -409,7 +409,7 @@ func (d *dedicatedsearchAdapter) checkStatus(i *Instance) (base.InstanceState, e
 			DomainName: aws.String(i.Domain), // Required
 		}
 
-		resp, err := svc.DescribeElasticsearchDomain(params)
+		resp, err := svc.DescribeDomain(params)
 		if err != nil {
 			if awsErr, ok := err.(awserr.Error); ok {
 				// Generic AWS error with Code, Message, and original error (if any)
@@ -773,7 +773,7 @@ func (d *dedicatedsearchAdapter) cleanupElasticSearchDomain(i *Instance) error {
 			DomainName: aws.String(i.Domain), // Required
 		}
 
-		_, err := svc.DescribeElasticsearchDomain(params)
+		_, err := svc.DescribeDomain(params)
 		if err != nil {
 			if awsErr, ok := err.(awserr.Error); ok {
 				// Instance no longer exists, this is success
@@ -781,7 +781,7 @@ func (d *dedicatedsearchAdapter) cleanupElasticSearchDomain(i *Instance) error {
 					return nil
 				}
 				// Generic AWS error with Code, Message, and original error (if any)
-				d.logger.Error("CleanUpESDomain - svc.DescribeElasticSearchDomain Failed", awsErr)
+				d.logger.Error("CleanUpESDomain - svc.DescribeDomain Failed", awsErr)
 
 				if reqErr, ok := err.(awserr.RequestFailure); ok {
 					// A service error occurred
