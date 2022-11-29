@@ -284,11 +284,11 @@ func (d *dedicatedsearchAdapter) modifysearch(i *Instance, password string) (bas
 		AdvancedOptions["indices.query.bool.max_clause_count"] = &i.IndicesQueryBoolMaxClauseCount
 	}
 	// Standard Parameters
-	params := &opensearchservice.UpdateDomainConfig{
+	params := &opensearchservice.UpdateDomainConfigInput{
 		DomainName:      aws.String(i.Domain),
 		AdvancedOptions: AdvancedOptions,
 	}
-	resp, err := svc.UpdateElasticsearchDomainConfig(params)
+	resp, err := svc.UpdateDomainConfig(params)
 	fmt.Println(awsutil.StringValue(resp))
 	if d.didAwsCallSucceed(err) {
 		return base.InstanceInProgress, nil
@@ -331,7 +331,7 @@ func (d *dedicatedsearchAdapter) bindsearchToApp(i *Instance, password string) (
 				i.Host = *(resp.DomainStatus.Endpoints["vpc"])
 				i.ARN = *(resp.DomainStatus.ARN)
 				i.State = base.InstanceReady
-				i.CurrentESVersion = *(resp.DomainStatus.ElasticsearchVersion)
+				i.CurrentESVersion = *(resp.DomainStatus.EngineVersion)
 				// Should only be one regardless. Just return now.
 			} else {
 				// Something went horribly wrong. Should never get here.
@@ -756,7 +756,7 @@ func (d *dedicatedsearchAdapter) cleanupElasticSearchDomain(i *Instance) error {
 	params := &opensearchservice.DeleteDomainInput{
 		DomainName: aws.String(i.Domain), // Required
 	}
-	resp, err := svc.deletesearchDomain(params)
+	resp, err := svc.DeleteDomain(params)
 
 	// Pretty-print the response data.
 	d.logger.Info(fmt.Sprintf("aws.deletesearchDomain: \n\t%s\n", awsutil.StringValue(resp)))
