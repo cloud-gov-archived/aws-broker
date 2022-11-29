@@ -301,7 +301,7 @@ func (d *dedicatedsearchAdapter) bindsearchToApp(i *Instance, password string) (
 	// Only search for details if the instance was not indicated as ready.
 	if i.State != base.InstanceReady {
 		svc := opensearchservice.New(session.New(), aws.NewConfig().WithRegion(d.settings.Region))
-		params := &opensearchservice.DescribeDomain{
+		params := &opensearchservice.DescribeDomainInput{
 			DomainName: aws.String(i.Domain), // Required
 		}
 
@@ -372,7 +372,7 @@ func (d *dedicatedsearchAdapter) bindsearchToApp(i *Instance, password string) (
 func (d *dedicatedsearchAdapter) deletesearch(i *Instance, password string, queue *taskqueue.QueueManager) (base.InstanceState, error) {
 	//check for backing resource and do async otherwise remove from db
 	svc := opensearchservice.New(session.New(), aws.NewConfig().WithRegion(d.settings.Region))
-	params := &opensearchservice.DescribeDomain{
+	params := &opensearchservice.DescribeDomainInput{
 		DomainName: aws.String(i.Domain), // Required
 	}
 	_, err := svc.DescribeDomain(params)
@@ -405,7 +405,7 @@ func (d *dedicatedsearchAdapter) checkStatus(i *Instance) (base.InstanceState, e
 	// Only search for details if the instance was not indicated as ready.
 	if i.State != base.InstanceReady {
 		svc := opensearchservice.New(session.New(), aws.NewConfig().WithRegion(d.settings.Region))
-		params := &opensearchservice.DescribeDomain{
+		params := &opensearchservice.DescribeDomainInput{
 			DomainName: aws.String(i.Domain), // Required
 		}
 
@@ -753,7 +753,7 @@ func (d *dedicatedsearchAdapter) cleanupRolesAndPolicies(i *Instance) error {
 func (d *dedicatedsearchAdapter) cleanupElasticSearchDomain(i *Instance) error {
 	svc := opensearchservice.New(session.New(), aws.NewConfig().WithRegion(d.settings.Region))
 
-	params := &opensearchservice.DeleteDomain{
+	params := &opensearchservice.DeleteDomainInput{
 		DomainName: aws.String(i.Domain), // Required
 	}
 	resp, err := svc.deletesearchDomain(params)
@@ -769,7 +769,7 @@ func (d *dedicatedsearchAdapter) cleanupElasticSearchDomain(i *Instance) error {
 	for {
 		time.Sleep(time.Minute)
 		svc := opensearchservice.New(session.New(), aws.NewConfig().WithRegion(d.settings.Region))
-		params := &opensearchservice.DescribeDomain{
+		params := &opensearchservice.DescribeDomainInput{
 			DomainName: aws.String(i.Domain), // Required
 		}
 

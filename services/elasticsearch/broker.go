@@ -225,7 +225,7 @@ func (broker *elasticsearchBroker) LastOperation(c *catalog.Catalog, id string, 
 		broker.logger.Debug(fmt.Sprintf("Deletion Job state: %s\n Message: %s\n", jobstate.State.String(), jobstate.Message))
 
 	default: //all other ops use synchronous checking of aws api
-		status, _ = adapter.checksearchStatus(&existingInstance)
+		status, _ = adapter.checkStatus(&existingInstance)
 		broker.brokerDB.Save(&existingInstance)
 
 	}
