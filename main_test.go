@@ -909,7 +909,7 @@ func TestCreateElasticsearchInstance(t *testing.T) {
 	}
 
 	// Is it in the database and has a username and password?
-	i := elasticsearch.ElasticsearchInstance{}
+	i := elasticsearch.Instance{}
 	brokerDB.Where("uuid = ?", "the_elasticsearch_instance").First(&i)
 	if i.Uuid == "0" {
 		t.Error("The instance should be saved in the DB")
@@ -951,7 +951,7 @@ func TestCreateElasticsearchInstance(t *testing.T) {
 	}
 
 	// Is it in the database and has a username and password?
-	i = elasticsearch.ElasticsearchInstance{}
+	i = elasticsearch.Instance{}
 	brokerDB.Where("uuid = ?", "the_advanced_elasticsearch_instance").First(&i)
 	if i.Uuid == "0" {
 		t.Error("The instance should be saved in the DB")
@@ -986,7 +986,7 @@ func TestModifyElasticsearchInstanceParams(t *testing.T) {
 	}
 
 	// Check to make sure the instance was saved.
-	i := elasticsearch.ElasticsearchInstance{}
+	i := elasticsearch.Instance{}
 	brokerDB.Where("uuid = ?", "the_elasticsearch_instance").First(&i)
 	if i.Uuid == "0" {
 		t.Error("The instance was not saved to the DB.")
@@ -1015,7 +1015,7 @@ func TestModifyElasticsearchInstanceParams(t *testing.T) {
 
 	// Is it a valid JSON?
 	validJSON(resp.Body.Bytes(), urlAcceptsIncomplete, t)
-	i = elasticsearch.ElasticsearchInstance{}
+	i = elasticsearch.Instance{}
 	brokerDB.Where("uuid = ?", "the_elasticsearch_instance").First(&i)
 	if i.Uuid == "0" {
 		t.Error("The instance should be saved in the DB")
@@ -1043,7 +1043,7 @@ func TestModifyElasticsearchInstancePlan(t *testing.T) {
 	}
 
 	// Check to make sure the instance was saved.
-	i := elasticsearch.ElasticsearchInstance{}
+	i := elasticsearch.Instance{}
 	brokerDB.Where("uuid = ?", "the_elasticsearch_instance").First(&i)
 	if i.Uuid == "0" {
 		t.Error("The instance was not saved to the DB.")
@@ -1079,7 +1079,7 @@ func TestModifyElasticsearchInstancePlan(t *testing.T) {
 	}
 
 	// Reload the instance and check to see that the plan has not been modified.
-	i = elasticsearch.ElasticsearchInstance{}
+	i = elasticsearch.Instance{}
 	brokerDB.Where("uuid = ?", "the_elasticsearch_instance").First(&i)
 	if i.PlanID != originalElasticsearchPlanID {
 		t.Logf("The instance was modified: " + i.PlanID + " != " + originalElasticsearchPlanID)
@@ -1157,7 +1157,7 @@ func TestElasticsearchBindInstance(t *testing.T) {
 		t.Error(url, "should return credentials")
 	}
 
-	instance := elasticsearch.ElasticsearchInstance{}
+	instance := elasticsearch.Instance{}
 	brokerDB.Where("uuid = ?", "the_elasticsearch_instance").First(&instance)
 
 	// Does it return an unencrypted password?
@@ -1194,7 +1194,7 @@ func TestElasticsearchDeleteInstance(t *testing.T) {
 
 	// Create the instance and try again
 	doRequest(m, "/v2/service_instances/the_elasticsearch_instance?accepts_incomplete=true", "PUT", true, bytes.NewBuffer(createRedisInstanceReq))
-	i := elasticsearch.ElasticsearchInstance{}
+	i := elasticsearch.Instance{}
 	brokerDB.Where("uuid = ?", "the_elasticsearch_instance").First(&i)
 	if i.Uuid == "0" {
 		t.Error("The instance should be in the DB")
@@ -1208,7 +1208,7 @@ func TestElasticsearchDeleteInstance(t *testing.T) {
 	}
 
 	// Is it actually gone from the DB?
-	i = elasticsearch.ElasticsearchInstance{}
+	i = elasticsearch.Instance{}
 	brokerDB.Where("uuid = ?", "the_redis_instance").First(&i)
 	if len(i.Uuid) > 0 {
 		t.Error("The instance shouldn't be in the DB")
