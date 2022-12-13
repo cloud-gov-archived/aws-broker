@@ -6,7 +6,7 @@ variable "rds_instance_type" {
 }
 
 variable "rds_db_size" {
-  default = 40
+  default = 20
 }
 
 variable "rds_db_storage_type" {
@@ -14,7 +14,7 @@ variable "rds_db_storage_type" {
 }
 
 variable "rds_db_iops" {
-  default = 0
+  default = 20
 }
 
 variable "rds_db_name" {

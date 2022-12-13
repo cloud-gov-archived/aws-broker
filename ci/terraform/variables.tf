@@ -56,6 +56,9 @@ variable "rds_internal_apply_immediately" {
 variable "rds_internal_allow_major_version_upgrade" {
 }
 
+variable "rds_internal_Iops"{
+}
+
 variable "rds_shared_mysql_instance_type" {
 }
 
@@ -89,6 +92,9 @@ variable "rds_shared_mysql_apply_immediately" {
 variable "rds_shared_mysql_allow_major_version_upgrade" {
 }
 
+variable "rds_shared_mysql_Iops"{
+}
+
 variable "rds_shared_postgres_instance_type" {
 }
 
@@ -120,4 +126,7 @@ variable "rds_shared_postgres_apply_immediately" {
 }
 
 variable "rds_shared_postgres_allow_major_version_upgrade" {
+}
+
+variable "rds_shared_postgres_Iops"{
 }

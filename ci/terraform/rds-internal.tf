@@ -12,6 +12,7 @@ module "rds_internal" {
   rds_final_snapshot_identifier = "${var.base_stack}-${replace(var.rds_internal_db_name, "_", "-")}"
   rds_db_engine                 = var.rds_internal_db_engine
   rds_db_engine_version         = var.rds_internal_db_engine_version
+  rds_db_iops                   = var.rds_internal_Iops
   rds_multi_az                  = var.rds_internal_multi_az
   rds_username                  = var.rds_internal_username
   rds_password                  = var.rds_internal_password
