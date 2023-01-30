@@ -214,7 +214,8 @@ func (d *dedicatedElasticsearchAdapter) createElasticsearch(i *ElasticsearchInst
 	}
 
 	advancedSecurityOptions := &opensearchservice.AdvancedSecurityOptionsInput_{
-		Enabled: aws.Bool(true),
+		Enabled:                     aws.Bool(true),
+		InternalUserDatabaseEnabled: aws.Bool(true),
 	}
 
 	if i.DataCount > 1 {
