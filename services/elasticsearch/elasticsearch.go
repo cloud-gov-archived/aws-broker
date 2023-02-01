@@ -213,8 +213,8 @@ func (d *dedicatedElasticsearchAdapter) createElasticsearch(i *ElasticsearchInst
 		AdvancedOptions["indices.query.bool.max_clause_count"] = &i.IndicesQueryBoolMaxClauseCount
 	}
 	masterUserOptions := &opensearchservice.MasterUserOptions{
-		MasterUserName:     aws.String("username"),
-		MasterUserPassword: aws.String("password"),
+		MasterUserName:     aws.String("@Username"),
+		MasterUserPassword: aws.String("@Password"),
 	}
 
 	advancedSecurityOptions := &opensearchservice.AdvancedSecurityOptionsInput_{
