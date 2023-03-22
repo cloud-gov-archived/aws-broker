@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"regexp"
 	"strings"
 
@@ -102,6 +103,8 @@ func (p *awsParameterGroupClient) CleanupCustomParameterGroups() {
 }
 
 func (p *awsParameterGroupClient) getParameterGroupFamily(i *RDSInstance) error {
+	debugKey := rand.Int()
+	log.Printf("entered getParameterGroupFamily, debug key: %d", debugKey)
 	if i.ParameterGroupFamily != "" {
 		return nil
 	}
@@ -111,6 +114,7 @@ func (p *awsParameterGroupClient) getParameterGroupFamily(i *RDSInstance) error 
 		return errors.New("DB version must be set to determine parameter group family")
 	}
 
+	log.Printf("%d: instance type: %s, version: %s", debugKey, i.DbType, i.DbVersion)
 	dbEngineVersionsInput := &rds.DescribeDBEngineVersionsInput{
 		Engine:        aws.String(i.DbType),
 		EngineVersion: aws.String(i.DbVersion),
@@ -124,9 +128,17 @@ func (p *awsParameterGroupClient) getParameterGroupFamily(i *RDSInstance) error 
 
 	// The value from the engine info is a string pointer, so we must
 	// retrieve its actual value.
-	parameterGroupFamily = *defaultEngineInfo.DBEngineVersions[0].DBParameterGroupFamily
+	families := strings.Join(func() []string {
+		var new = make([]string, len(defaultEngineInfo.DBEngineVersions))
+		for i, v := range defaultEngineInfo.DBEngineVersions {
+			new[i] = *v.DBParameterGroupFamily
+		}
+		return new
+	}(), ",")
+	log.Printf("%d: got %d db engine versions: %s", debugKey, len(defaultEngineInfo.DBEngineVersions), families)
+	parameterGroupFamily = *defaultEngineInfo.DBEngineVersions[0].DBParameterGroupFamily // here
 
-	log.Printf("got parameter group family: %s", parameterGroupFamily)
+	log.Printf("%d: got parameter group family: %s", debugKey, parameterGroupFamily)
 	i.ParameterGroupFamily = parameterGroupFamily
 	return nil
 }
