@@ -196,16 +196,21 @@ func (broker *elasticsearchBroker) ModifyInstance(c *catalog.Catalog, id string,
 	if esInstance.PlanID != updateRequest.PlanID {
 		return response.NewErrorResponse(http.StatusBadRequest, "Updating Elasticsearch service instances is not supported at this time.")
 	}
+
 	err := esInstance.update(options)
 	if err != nil {
 		broker.logger.Error("Updating instance failed", err)
 		return response.NewErrorResponse(http.StatusBadRequest, "Error updating Elasticsearch service instance")
 	}
-	_, err = adapter.modifyElasticsearch(&esInstance)
+
+	status, err := adapter.modifyElasticsearch(&esInstance)
 	if err != nil {
 		broker.logger.Error("AWS call updating instance failed", err)
 		return response.NewErrorResponse(http.StatusBadRequest, "Error modifying Elasticsearch service instance")
 	}
+
+	esInstance.State = status
+
 	err = broker.brokerDB.Save(&esInstance).Error
 	if err != nil {
 		broker.logger.Error("Saving instance failed", err)
