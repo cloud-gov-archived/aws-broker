@@ -7,9 +7,6 @@ import (
 	"os"
 
 	"code.cloudfoundry.org/lager"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/elasticache"
 	brokertags "github.com/cloud-gov/go-broker-tags"
 	"github.com/jinzhu/gorm"
 
@@ -66,26 +63,6 @@ func (broker *redisBroker) AsyncOperationRequired(c *catalog.Catalog, i base.Ins
 	default:
 		return false
 	}
-}
-
-// initializeAdapter is the main function to create database instances
-func initializeAdapter(plan catalog.RedisPlan, s *config.Settings, c *catalog.Catalog, logger lager.Logger) (redisAdapter, response.Response) {
-
-	var redisAdapter redisAdapter
-
-	if s.Environment == "test" {
-		redisAdapter = &mockRedisAdapter{}
-		return redisAdapter, nil
-	}
-
-	elasticacheClient := elasticache.New(session.New(), aws.NewConfig().WithRegion(s.Region))
-	redisAdapter = &dedicatedRedisAdapter{
-		Plan:        plan,
-		settings:    *s,
-		logger:      logger,
-		elasticache: elasticacheClient,
-	}
-	return redisAdapter, nil
 }
 
 func (broker *redisBroker) parseOptionsFromRequest(

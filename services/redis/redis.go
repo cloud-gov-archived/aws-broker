@@ -9,6 +9,7 @@ import (
 	"github.com/18F/aws-broker/base"
 	"github.com/18F/aws-broker/catalog"
 	"github.com/18F/aws-broker/config"
+	"github.com/18F/aws-broker/helpers/response"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/awsutil"
@@ -83,6 +84,24 @@ func (d *sharedRedisAdapter) deleteRedis(i *RedisInstance) (base.InstanceState, 
 	return base.InstanceGone, nil
 }
 
+func initializeAdapter(plan catalog.RedisPlan, s *config.Settings, c *catalog.Catalog, logger lager.Logger) (redisAdapter, response.Response) {
+	var redisAdapter redisAdapter
+
+	if s.Environment == "test" {
+		redisAdapter = &mockRedisAdapter{}
+		return redisAdapter, nil
+	}
+
+	elasticache := elasticache.New(session.New(), aws.NewConfig().WithRegion(s.Region))
+	redisAdapter = &dedicatedRedisAdapter{
+		Plan:        plan,
+		settings:    *s,
+		logger:      logger,
+		elasticache: elasticache,
+	}
+	return redisAdapter, nil
+}
+
 type dedicatedRedisAdapter struct {
 	Plan        catalog.RedisPlan
 	settings    config.Settings
@@ -109,6 +128,9 @@ func (d *dedicatedRedisAdapter) createRedis(i *RedisInstance, password string) (
 }
 
 func (d *dedicatedRedisAdapter) modifyRedis(i *RedisInstance) (base.InstanceState, error) {
+	// if i.EngineVersion != "" {
+	// 	params.EngineVersion = aws.String(i.EngineVersion)
+	// }
 	return base.InstanceNotModified, nil
 }
 
