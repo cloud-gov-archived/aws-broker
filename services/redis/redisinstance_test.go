@@ -40,5 +40,42 @@ func TestInitInstanceTags(t *testing.T) {
 
 	if diff := deep.Equal(instance.Tags, expectedTags); diff != nil {
 		t.Error(diff)
+	"reflect"
+	"testing"
+)
+
+func TestModifyInstance(t *testing.T) {
+	testCases := map[string]struct {
+		options          RedisOptions
+		existingInstance *RedisInstance
+		expectedInstance *RedisInstance
+		expectErr        bool
+	}{
+		"update engine version": {
+			options: RedisOptions{
+				EngineVersion: "7.0",
+			},
+			existingInstance: &RedisInstance{
+				EngineVersion: "6.0",
+			},
+			expectedInstance: &RedisInstance{
+				EngineVersion: "7.0",
+			},
+		},
+	}
+
+	for name, test := range testCases {
+		t.Run(name, func(t *testing.T) {
+			err := test.existingInstance.modify(test.options)
+			if !test.expectErr && err != nil {
+				t.Fatalf("unexpected error: %s", err)
+			}
+			if test.expectErr && err == nil {
+				t.Errorf("expected error, got nil")
+			}
+			if !reflect.DeepEqual(test.existingInstance, test.expectedInstance) {
+				t.Fatalf("expected instance: %+v, got instance: %+v", test.expectedInstance, test.existingInstance)
+			}
+		})
 	}
 }
