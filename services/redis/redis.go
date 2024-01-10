@@ -128,9 +128,22 @@ func (d *dedicatedRedisAdapter) createRedis(i *RedisInstance, password string) (
 }
 
 func (d *dedicatedRedisAdapter) modifyRedis(i *RedisInstance) (base.InstanceState, error) {
-	// if i.EngineVersion != "" {
-	// 	params.EngineVersion = aws.String(i.EngineVersion)
-	// }
+	params := &elasticache.ModifyReplicationGroupInput{
+		ApplyImmediately: aws.Bool(true),
+	}
+	if i.EngineVersion != "" {
+		params.EngineVersion = aws.String(i.EngineVersion)
+	}
+
+	_, err := d.elasticache.ModifyReplicationGroup(params)
+	if err != nil {
+		return base.InstanceNotModified, err
+	}
+
+	// Decide if AWS service call was successful
+	if yes := d.didAwsCallSucceed(err); yes {
+		return base.InstanceInProgress, nil
+	}
 	return base.InstanceNotModified, nil
 }
 

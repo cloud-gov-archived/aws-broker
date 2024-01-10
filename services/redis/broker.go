@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"code.cloudfoundry.org/lager"
 	brokertags "github.com/cloud-gov/go-broker-tags"
@@ -25,7 +26,7 @@ func (r RedisOptions) Validate(plan catalog.RedisPlan) error {
 	// Check to make sure that the version specified is allowed by the plan.
 	if r.EngineVersion != "" {
 		if !plan.CheckVersion(r.EngineVersion) {
-			return fmt.Errorf("%s is not a supported major version; major version must be one of: 7.0, 6.2, 6.0, 5.0.6", r.EngineVersion)
+			return fmt.Errorf("%s is not a supported major version; major version must be one of: %s", r.EngineVersion, strings.Join(plan.ApprovedMajorVersions, ", "))
 		}
 	}
 	return nil
