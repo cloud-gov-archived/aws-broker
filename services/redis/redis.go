@@ -25,7 +25,7 @@ import (
 
 type redisAdapter interface {
 	createRedis(i *RedisInstance, password string) (base.InstanceState, error)
-	modifyRedis(i *RedisInstance, password string) (base.InstanceState, error)
+	modifyRedis(i *RedisInstance) (base.InstanceState, error)
 	checkRedisStatus(i *RedisInstance) (base.InstanceState, error)
 	bindRedisToApp(i *RedisInstance, password string) (map[string]string, error)
 	deleteRedis(i *RedisInstance) (base.InstanceState, error)
@@ -39,7 +39,7 @@ func (d *mockRedisAdapter) createRedis(i *RedisInstance, password string) (base.
 	return base.InstanceReady, nil
 }
 
-func (d *mockRedisAdapter) modifyRedis(i *RedisInstance, password string) (base.InstanceState, error) {
+func (d *mockRedisAdapter) modifyRedis(i *RedisInstance) (base.InstanceState, error) {
 	// TODO
 	return base.InstanceReady, nil
 }
@@ -67,7 +67,7 @@ func (d *sharedRedisAdapter) createRedis(i *RedisInstance, password string) (bas
 	return base.InstanceReady, nil
 }
 
-func (d *sharedRedisAdapter) modifyRedis(i *RedisInstance, password string) (base.InstanceState, error) {
+func (d *sharedRedisAdapter) modifyRedis(i *RedisInstance) (base.InstanceState, error) {
 	return base.InstanceReady, nil
 }
 
@@ -108,7 +108,7 @@ func (d *dedicatedRedisAdapter) createRedis(i *RedisInstance, password string) (
 	return base.InstanceNotCreated, nil
 }
 
-func (d *dedicatedRedisAdapter) modifyRedis(i *RedisInstance, password string) (base.InstanceState, error) {
+func (d *dedicatedRedisAdapter) modifyRedis(i *RedisInstance) (base.InstanceState, error) {
 	return base.InstanceNotModified, nil
 }
 

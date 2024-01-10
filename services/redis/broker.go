@@ -2,6 +2,7 @@ package redis
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -23,7 +24,13 @@ type RedisOptions struct {
 	EngineVersion string `json:"engineVersion"`
 }
 
-func (r RedisOptions) Validate(settings *config.Settings) error {
+func (r RedisOptions) Validate(plan catalog.RedisPlan) error {
+	// Check to make sure that the version specified is allowed by the plan.
+	if r.EngineVersion != "" {
+		if !plan.CheckVersion(r.EngineVersion) {
+			return fmt.Errorf("%s is not a supported major version; major version must be one of: 7.0, 6.2, 6.0, 5.0.6", r.EngineVersion)
+		}
+	}
 	return nil
 }
 
@@ -81,19 +88,35 @@ func initializeAdapter(plan catalog.RedisPlan, s *config.Settings, c *catalog.Ca
 	return redisAdapter, nil
 }
 
+func (broker *redisBroker) parseOptionsFromRequest(
+	request request.Request,
+	plan catalog.RedisPlan,
+) (RedisOptions, error) {
+	options := RedisOptions{}
+	if len(request.RawParameters) > 0 {
+		err := json.Unmarshal(request.RawParameters, &options)
+		if err != nil {
+			return options, err
+		}
+		err = options.Validate(plan)
+		if err != nil {
+			return options, err
+		}
+	}
+	return options, nil
+}
+
 func (broker *redisBroker) CreateInstance(c *catalog.Catalog, id string, createRequest request.Request) response.Response {
 	newInstance := RedisInstance{}
 
-	options := RedisOptions{}
-	if len(createRequest.RawParameters) > 0 {
-		err := json.Unmarshal(createRequest.RawParameters, &options)
-		if err != nil {
-			return response.NewErrorResponse(http.StatusBadRequest, "Invalid parameters. Error: "+err.Error())
-		}
-		err = options.Validate(broker.settings)
-		if err != nil {
-			return response.NewErrorResponse(http.StatusBadRequest, "Invalid parameters. Error: "+err.Error())
-		}
+	plan, planErr := c.RedisService.FetchPlan(createRequest.PlanID)
+	if planErr != nil {
+		return planErr
+	}
+
+	options, err := broker.parseOptionsFromRequest(createRequest, plan)
+	if err != nil {
+		return response.NewErrorResponse(http.StatusBadRequest, "Invalid parameters. Error: "+err.Error())
 	}
 
 	var count int64
@@ -102,10 +125,6 @@ func (broker *redisBroker) CreateInstance(c *catalog.Catalog, id string, createR
 		return response.NewErrorResponse(http.StatusConflict, "The instance already exists")
 	}
 
-	plan, planErr := c.RedisService.FetchPlan(createRequest.PlanID)
-	if planErr != nil {
-		return planErr
-	}
 	if options.EngineVersion != "" {
 		// Check to make sure that the version specified is allowed by the plan.
 		if !plan.CheckVersion(options.EngineVersion) {
@@ -169,9 +188,67 @@ func (broker *redisBroker) CreateInstance(c *catalog.Catalog, id string, createR
 	return response.SuccessAcceptedResponse
 }
 
-func (broker *redisBroker) ModifyInstance(c *catalog.Catalog, id string, updateRequest request.Request, baseInstance base.Instance) response.Response {
-	// Note:  This is not currently supported for Redis instances.
-	return response.NewErrorResponse(http.StatusBadRequest, "Updating Redis service instances is not supported at this time.")
+func (broker *redisBroker) ModifyInstance(c *catalog.Catalog, id string, modifyRequest request.Request, baseInstance base.Instance) response.Response {
+	existingInstance := RedisInstance{}
+
+	newPlan, planErr := c.RedisService.FetchPlan(modifyRequest.PlanID)
+	if planErr != nil {
+		return planErr
+	}
+
+	options, err := broker.parseOptionsFromRequest(modifyRequest, newPlan)
+	if err != nil {
+		return response.NewErrorResponse(http.StatusBadRequest, "Invalid parameters. Error: "+err.Error())
+	}
+
+	// Load the existing instance provided.
+	var count int64
+	broker.brokerDB.Where("uuid = ?", id).First(existingInstance).Count(&count)
+	if count == 0 {
+		return response.NewErrorResponse(http.StatusNotFound, "The instance does not exist.")
+	}
+
+	// Check to make sure that we're not switching plans; this is not
+	// not yet supported.
+	if newPlan.ID != existingInstance.PlanID {
+		return response.NewErrorResponse(
+			http.StatusBadRequest,
+			"Switching plans is not supported.",
+		)
+	}
+
+	err = existingInstance.modify(options)
+	if err != nil {
+		return response.NewErrorResponse(http.StatusBadRequest, "There was an error initializing the instance. Error: "+err.Error())
+	}
+
+	adapter, adapterErr := initializeAdapter(newPlan, broker.settings, c, broker.logger)
+	if adapterErr != nil {
+		return adapterErr
+	}
+
+	// Modify the redis instance.
+	status, err := adapter.modifyRedis(&existingInstance)
+	if status == base.InstanceNotModified {
+		desc := "There was an error modifying the instance."
+
+		if err != nil {
+			desc = desc + " Error: " + err.Error()
+		}
+
+		return response.NewErrorResponse(http.StatusBadRequest, desc)
+	}
+
+	// Update the existing instance in the broker.
+	existingInstance.State = status
+	existingInstance.PlanID = newPlan.ID
+	err = broker.brokerDB.Save(existingInstance).Error
+
+	if err != nil {
+		return response.NewErrorResponse(http.StatusBadRequest, err.Error())
+	}
+
+	return response.SuccessAcceptedResponse
 }
 
 func (broker *redisBroker) LastOperation(c *catalog.Catalog, id string, baseInstance base.Instance, operation string) response.Response {

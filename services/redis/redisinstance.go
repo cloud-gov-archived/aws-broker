@@ -128,7 +128,6 @@ func (i *RedisInstance) init(
 		// Default to the version provided by the plan chosen in catalog.
 		i.EngineVersion = plan.EngineVersion
 	}
-
 	i.NumCacheClusters = plan.NumCacheClusters
 	i.CacheNodeType = plan.CacheNodeType
 	i.PreferredMaintenanceWindow = plan.PreferredMaintenanceWindow
@@ -151,5 +150,12 @@ func (i *RedisInstance) setTags(
 		i.Tags[k] = v
 	}
 
+	return nil
+}
+
+func (i *RedisInstance) modify(options RedisOptions) error {
+	if options.EngineVersion != i.EngineVersion {
+		i.EngineVersion = options.EngineVersion
+	}
 	return nil
 }
