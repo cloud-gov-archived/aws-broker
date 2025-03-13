@@ -74,6 +74,9 @@ func run() error {
 		return fmt.Errorf("could not initialize session: %s", err)
 	}
 
+	path, _ := os.Getwd()
+	c := catalog.InitCatalog(path)
+
 	if *actionPtr == "reconcile-tags" {
 		tagManager, err := brokertags.NewCFTagManager(
 			"AWS broker",
@@ -85,9 +88,6 @@ func run() error {
 		if err != nil {
 			return fmt.Errorf("could not initialize tag manager: %s", err)
 		}
-
-		path, _ := os.Getwd()
-		c := catalog.InitCatalog(path)
 
 		logsClient := cloudwatchlogs.New(sess)
 
@@ -120,6 +120,16 @@ func run() error {
 		if slices.Contains(servicesToTag, "rds") {
 			rdsClient := awsRds.New(sess)
 			err := rds.ReconcileRDSCloudwatchLogGroups(logsClient, rdsClient, settings.DbNamePrefix, db)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if *actionPtr == "reconcile-missing-resources" {
+		if slices.Contains(servicesToTag, "rds") {
+			rdsClient := awsRds.New(sess)
+			err := tasksRds.ReconcileMissingResourcesForAllRDSDatabases(c, db, rdsClient)
 			if err != nil {
 				return err
 			}
